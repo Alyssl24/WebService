@@ -2,9 +2,10 @@
 
 ## Membres de l'équipe-projet
 
-| Prénom | NOM | Username |
-|--------|-----|----------|
-| ?      | ?   | ?        |
+| Prénom  | NOM       | Username   |
+|---------|-----------|------------|
+| Alyssia | Leclerc   | Alyssl24   |
+| Chedli  | Benjaafar | Chaydonart |
 
 ## Instructions
 
