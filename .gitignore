@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Compiled class file
 *.class
 
@@ -63,8 +62,3 @@ build/
 
 # Mac OS
 .DS_Store
-
-# Fichiers générés et artefacts communs
-*.class
-*.jar
->>>>>>> master
