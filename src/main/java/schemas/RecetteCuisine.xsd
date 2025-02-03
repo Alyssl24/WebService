@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns="http://www.monsite.com/recettes/v1"
+            xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.monsite.com/recettes/v1"
+            elementFormDefault="qualified">
+
+
+    <xsd:element name="nom_plat" type="xsd:string"/>
+
+    <xsd:element name="type_repas" type="xsd:string">
+        <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="petit-dejeuner"/>
+                <xsd:enumeration value="dejeuner"/>
+                <xsd:enumeration value="soupe"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:element>
+
+    <xsd:element name="type_plat" type="xsd:string">
+        <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="entree"/>
+                <xsd:enumeration value="plat"/>
+                <xsd:enumeration value="dessert"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:element>
+
+    <xsd:element name="type_cuisine" type="xsd:string"/>
+    <xsd:element name="temps_preparation" type="xsd:duration"/>
+    <xsd:element name="image_recette" type="xsd:anyURI"/>
+    <xsd:element name="url_origine" type="xsd:anyURI"/>
+    <xsd:element name="calories" type="xsd:integer"/>
+
+
+    <xsd:element name="ingredient">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="texte_complet" type="xsd:string"/>
+                <xsd:element name="nom_pur" type="xsd:string"/>
+                <xsd:element name="quantite" type="xsd:string"/>
+                <xsd:element name="image_ingredient" type="xsd:anyURI" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="ingredients">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="ingredient" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="allergenes">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="allergene" type="xsd:string" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="type_details">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="type_repas"/>
+                <xsd:element ref="type_plat"/>
+                <xsd:element ref="type_cuisine"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="recette">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="nom_plat"/>
+                <xsd:element ref="type_details"/>
+                <xsd:element ref="temps_preparation"/>
+                <xsd:element ref="image_recette"/>
+                <xsd:element ref="url_origine"/>
+                <xsd:element ref="ingredients"/>
+                <xsd:element ref="allergenes" minOccurs="0"/>
+                <xsd:element ref="calories"/>
+            </xsd:sequence>
+            <xsd:attribute name="id_recette" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
