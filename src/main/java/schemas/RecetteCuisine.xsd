@@ -29,10 +29,10 @@
     </xsd:element>
 
     <xsd:element name="type_cuisine" type="xsd:string"/>
-    <xsd:element name="temps_preparation" type="xsd:duration"/>
+    <xsd:element name="temps_preparation" type="xsd:time"/>
     <xsd:element name="image_recette" type="xsd:anyURI"/>
     <xsd:element name="url_origine" type="xsd:anyURI"/>
-    <xsd:element name="calories" type="xsd:integer"/>
+    <xsd:element name="calories" type="xsd:decimal"/>
 
 
     <xsd:element name="ingredient">
