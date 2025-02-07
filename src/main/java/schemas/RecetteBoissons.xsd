@@ -5,30 +5,23 @@
             elementFormDefault="qualified">
 
     <xsd:element name="nom_boisson" type="xsd:string"/>
+    <xsd:element name="presence_alcool" type="xsd:boolean"/>
+    <xsd:element name="categorie_boisson" type="xsd:string"/>
+    <xsd:element name="type_verre" type="xsd:string"/>
+    <xsd:element name="temps_preparation" type="xsd:duration"/>
+    <xsd:element name="image_boisson" type="xsd:anyURI"/>
+    <xsd:element name="ingredient_synthetique" type="xsd:string"/>
+    <xsd:element name="instructions" type="xsd:string"/>
 
     <xsd:element name="type_details">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element name="presence_alcool" type="xsd:boolean"/>
-                <xsd:element name="categorie_boisson" type="xsd:string">
-                    <xsd:simpleType>
-                        <xsd:restriction base="xsd:string">
-                            <xsd:enumeration value="cocktail"/>
-                            <xsd:enumeration value="smoothie"/>
-                            <xsd:enumeration value="jus"/>
-                            <xsd:enumeration value="soda"/>
-                        </xsd:restriction>
-                    </xsd:simpleType>
-                </xsd:element>
-                <xsd:element name="type_verre" type="xsd:string"/>
+                <xsd:element ref="presence_alcool"/>
+                <xsd:element ref="categorie_boisson"/>
+                <xsd:element ref="type_verre"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
-    <xsd:element name="temps_preparation" type="xsd:duration"/>
-    <xsd:element name="image_boisson" type="xsd:anyURI"/>
-
-    <xsd:element name="ingredient_synthetique" type="xsd:string"/>
 
     <xsd:element name="ingredients_synthetiques">
         <xsd:complexType>
@@ -55,8 +48,6 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
-    <xsd:element name="instructions" type="xsd:string"/>
 
     <xsd:element name="recette_boisson">
         <xsd:complexType>
