@@ -14,14 +14,17 @@ public class Recette {
     @XmlElement(name = "nom_plat")
     private String nomPlat;
 
+    @XmlElementWrapper(name = "types_repas")
     @XmlElement(name = "type_repas")
-    private String typeRepas;
+    private List<String> typeRepas;
 
+    @XmlElementWrapper(name = "types_plat")
     @XmlElement(name = "type_plat")
-    private String typePlat;
+    private List<String> typePlat;
 
+    @XmlElementWrapper(name = "types_cuisine")
     @XmlElement(name = "type_cuisine")
-    private String typeCuisine;
+    private List<String> typeCuisine;
 
     @XmlElement(name = "temps_preparation")
     private String tempsPreparation;
@@ -57,7 +60,7 @@ public class Recette {
     // 🔹 Constructeur vide requis pour JAXB
     public Recette() {}
 
-    public Recette(String idRecette, String nomPlat, String typeRepas, String typePlat, String typeCuisine,
+    public Recette(String idRecette, String nomPlat, List<String> typeRepas, List<String> typePlat, List<String> typeCuisine,
                    String tempsPreparation, String imageRecette, String urlOrigine, BigDecimal calories,
                    String textComplet, String nomPur, String quantite, String imageIngredient, String allergene,
                    List<String> ingredientLines) {
@@ -85,14 +88,14 @@ public class Recette {
     public String getNomPlat() { return nomPlat; }
     public void setNomPlat(String nomPlat) { this.nomPlat = nomPlat; }
 
-    public String getTypeRepas() { return typeRepas; }
-    public void setTypeRepas(String typeRepas) { this.typeRepas = typeRepas; }
+    public List<String> getTypeRepas() { return typeRepas; }
+    public void setTypeRepas(List<String> typeRepas) { this.typeRepas = typeRepas; }
 
-    public String getTypePlat() { return typePlat; }
-    public void setTypePlat(String typePlat) { this.typePlat = typePlat; }
+    public List<String> getTypePlat() { return typePlat; }
+    public void setTypePlat(List<String> typePlat) { this.typePlat = typePlat; }
 
-    public String getTypeCuisine() { return typeCuisine; }
-    public void setTypeCuisine(String typeCuisine) { this.typeCuisine = typeCuisine; }
+    public List<String> getTypeCuisine() { return typeCuisine; }
+    public void setTypeCuisine(List<String> typeCuisine) { this.typeCuisine = typeCuisine; }
 
     public String getTempsPreparation() { return tempsPreparation; }
     public void setTempsPreparation(String tempsPreparation) { this.tempsPreparation = tempsPreparation; }

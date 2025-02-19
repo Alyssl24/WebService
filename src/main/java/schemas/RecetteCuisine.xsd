@@ -11,23 +11,16 @@
     <xsd:element name="type_repas" type="xsd:string">
         <xsd:simpleType>
             <xsd:restriction base="xsd:string">
-                <xsd:enumeration value="petit-dejeuner"/>
-                <xsd:enumeration value="dejeuner"/>
-                <xsd:enumeration value="soupe"/>
+                <xsd:enumeration value="teatime"/>
+                <xsd:enumeration value="lunch/dinner"/>
+                <xsd:enumeration value="snack"/>
+                <xsd:enumeration value="breakfast"/>
+                <xsd:enumeration value="brunch"/>
             </xsd:restriction>
         </xsd:simpleType>
     </xsd:element>
 
-    <xsd:element name="type_plat" type="xsd:string">
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:string">
-                <xsd:enumeration value="entree"/>
-                <xsd:enumeration value="plat"/>
-                <xsd:enumeration value="dessert"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-    </xsd:element>
-
+    <xsd:element name="type_plat" type="xsd:string"/>
     <xsd:element name="type_cuisine" type="xsd:string"/>
     <xsd:element name="temps_preparation" type="xsd:time"/>
     <xsd:element name="image_recette" type="xsd:anyURI"/>
@@ -62,12 +55,36 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="types_cuisine">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="type_cuisine" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="types_repas">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="type_repas" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="types_plat">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="type_plat" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="type_details">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element ref="type_repas"/>
-                <xsd:element ref="type_plat"/>
-                <xsd:element ref="type_cuisine"/>
+                <xsd:element ref="types_repas"/>
+                <xsd:element ref="types_plat"/>
+                <xsd:element ref="types_cuisine"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>

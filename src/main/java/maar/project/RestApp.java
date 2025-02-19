@@ -14,6 +14,8 @@ import maar.project.recette.Recette;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,16 +45,53 @@ public class RestApp {
                 }
             }
 
+            JsonArray TypeCuisineArray = recipeJson.getJsonArray("cuisineType");
+            List<String> TypeCuisineLines = new ArrayList<>();
+            if (TypeCuisineArray != null) {
+                for (int i = 0; i < TypeCuisineArray.size(); i++) {
+                    TypeCuisineLines.add(TypeCuisineArray.getString(i));
+                }
+            }
+
+            JsonArray TypeRepasArray = recipeJson.getJsonArray("mealType");
+            List<String> TypeRepasLines = new ArrayList<>();
+            if (TypeRepasArray != null) {
+                for (int i = 0; i < TypeRepasArray.size(); i++) {
+                    TypeRepasLines.add(TypeRepasArray.getString(i));
+                }
+            }
+
+            JsonArray TypePlatsArray = recipeJson.getJsonArray("dishType");
+            List<String> TypePlatsLines = new ArrayList<>();
+            if (TypePlatsArray != null) {
+                for (int i = 0; i < TypePlatsArray.size(); i++) {
+                    TypePlatsLines.add(TypePlatsArray.getString(i));
+                }
+            }
+
+            double totalTime = recipeJson.containsKey("totalTime") ?
+                    recipeJson.getJsonNumber("totalTime").doubleValue() : 30.0;
+            int totalMinutes = (int) totalTime;
+            int hours = totalMinutes / 60;
+            int minutes = totalMinutes % 60;
+            LocalTime localTime = LocalTime.of(hours, minutes, 0);
+            String timeFormatted = localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
+
             recette = new Recette(
                     recipeJson.getString("uri"),
                     recipeJson.getString("label"),
-                    "dejeuner",
-                    "plat",
-                    "Indian",
-                    "00:30:00",
+                    TypeRepasLines,
+                    TypePlatsLines,
+                    TypeCuisineLines,
+                    timeFormatted,
                     recipeJson.getString("image"),
                     recipeJson.getString("url"),
                     BigDecimal.valueOf(recipeJson.getJsonNumber("calories").doubleValue()),
+                    // il faudrait recuperer tout ca par rapport au tableau "ingredients" dans le json
+                    // le text complet est dans "ingredientsLines"
+                    // mais j'avoue que je n'y arrive pas donc si jamais tu peux voir pour le faire
+                    // attention ya des modif a faire dans le xsd (surtout quand l'elt en json est une list)
+                    // ingredientsLines est un peut fait n'importe comment car il prends les elts de "ingredientLines"
                     "Exemple de texte complet de l'ingrédient",
                     "NomPur Exemple",
                     "1 portion",
