@@ -1,15 +1,21 @@
 package maar.project;
-
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbException;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 import maar.project.recette.Recette;
-
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Path("/recipe")
 public class RestApp {
@@ -19,21 +25,43 @@ public class RestApp {
 
     private final Client client = ClientBuilder.newClient();
 
-    public static void main(String[] args)
-    {
-        RestApp app = new RestApp();
-        String jsonResponse = app.getRecipe("Indian").readEntity(String.class);
-        Recette recette = convertJsonToRecette(jsonResponse);
-        System.out.println(recette);
-    }
-
     public static Recette convertJsonToRecette(String jsonResponse) {
-        Jsonb jsonb = JsonbBuilder.create();
         Recette recette = null;
 
-        try {
-            recette = jsonb.fromJson(jsonResponse, Recette.class);
-        } catch (JsonbException e) {
+        try (JsonReader jsonReader = Json.createReader(new StringReader(jsonResponse))) {
+            JsonObject rootJson = jsonReader.readObject();
+
+            JsonObject recipeJson = rootJson.getJsonArray("hits")
+                    .getJsonObject(0)  // c ici qu'on récupère juste le premier elt de hits
+                    .getJsonObject("recipe");
+
+            JsonArray ingredientsArray = recipeJson.getJsonArray("ingredientLines");
+            List<String> ingredientLines = new ArrayList<>();
+            if (ingredientsArray != null) {
+                for (int i = 0; i < ingredientsArray.size(); i++) {
+                    ingredientLines.add(ingredientsArray.getString(i));
+                }
+            }
+
+            recette = new Recette(
+                    recipeJson.getString("uri"),
+                    recipeJson.getString("label"),
+                    "dejeuner",
+                    "plat",
+                    "Indian",
+                    "00:30:00",
+                    recipeJson.getString("image"),
+                    recipeJson.getString("url"),
+                    BigDecimal.valueOf(recipeJson.getJsonNumber("calories").doubleValue()),
+                    "Exemple de texte complet de l'ingrédient",
+                    "NomPur Exemple",
+                    "1 portion",
+                    "https://example.com/ingredient.jpg",
+                    "Lait",
+                    ingredientLines
+            );
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -42,13 +70,27 @@ public class RestApp {
 
     @GET
     @Path("/meal/{cuisineType}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
         String fullUrl = API_URL + "?type=public&app_id=" + APP_ID + "&app_key=" + APP_KEY + "&cuisineType=" + cuisineType;
 
-        Response apiResponse = client.target(fullUrl)
+        String jsonResponse = client.target(fullUrl)
                 .request(MediaType.APPLICATION_JSON)
-                .get();
-        return apiResponse;
-    }
+                .get()
+                .readEntity(String.class);
 
+        Recette recette = convertJsonToRecette(jsonResponse);
+
+        StringWriter xmlWriter = new StringWriter();
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(Recette.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.marshal(recette, xmlWriter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.ok(xmlWriter.toString()).build();
+    }
 }
