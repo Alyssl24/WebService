@@ -35,7 +35,7 @@ public class Recette {
     @XmlElement(name = "calories", namespace = "http://www.monsite.com/recettes/v1")
     private BigDecimal calories;
 
-    public Recette() {}  // Nécessaire pour JAXB
+    public Recette() {}
 
     public Recette(String idRecette, String nomPlat, TypeDetails typeDetails, String tempsPreparation,
                    String imageRecette, String urlOrigine, Ingredients ingredients,

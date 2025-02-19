@@ -1,5 +1,8 @@
 package maar.project;
 
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -16,14 +19,25 @@ public class RestApp {
 
     private final Client client = ClientBuilder.newClient();
 
-    public static void main( String[] args )
+    public static void main(String[] args)
     {
         RestApp app = new RestApp();
-        System.out.println(app.getRecipe("Indian"));
+        String jsonResponse = app.getRecipe("Indian").readEntity(String.class);
+        Recette recette = convertJsonToRecette(jsonResponse);
+        System.out.println(recette);
     }
 
-    public String getToken_jaxb(String cuisineType) {
-        return getRecipe(cuisineType).readEntity(Recette.class).toString();
+    public static Recette convertJsonToRecette(String jsonResponse) {
+        Jsonb jsonb = JsonbBuilder.create();
+        Recette recette = null;
+
+        try {
+            recette = jsonb.fromJson(jsonResponse, Recette.class);
+        } catch (JsonbException e) {
+            e.printStackTrace();
+        }
+
+        return recette;
     }
 
     @GET
