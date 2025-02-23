@@ -1,14 +1,12 @@
 <?xml version="1.0"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns="http://www.monsite.com/recettes/v1"
-            xmlns:xs="http://www.w3.org/2001/XMLSchema"
             targetNamespace="http://www.monsite.com/recettes/v1"
             elementFormDefault="qualified">
 
-
     <xsd:element name="nom_plat" type="xsd:string"/>
 
-    <xsd:element name="type_repas" type="xsd:string">
+    <xsd:element name="type_repas">
         <xsd:simpleType>
             <xsd:restriction base="xsd:string">
                 <xsd:enumeration value="teatime"/>
@@ -26,7 +24,6 @@
     <xsd:element name="image_recette" type="xsd:anyURI"/>
     <xsd:element name="url_origine" type="xsd:anyURI"/>
     <xsd:element name="calories" type="xsd:decimal"/>
-
 
     <xsd:element name="ingredient">
         <xsd:complexType>
@@ -47,13 +44,8 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="allergenes">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="allergene" type="xsd:string" minOccurs="0"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
+    <!-- Adaptation : allergenes est maintenant de type string -->
+    <xsd:element name="allergenes" type="xsd:string" minOccurs="0"/>
 
     <xsd:element name="types_cuisine">
         <xsd:complexType>
@@ -88,7 +80,6 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
 
     <xsd:element name="recette">
         <xsd:complexType>
