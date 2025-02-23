@@ -139,13 +139,37 @@ public class RestApp {
     @Path("/meal/{cuisineType}")
     @Produces(MediaType.APPLICATION_XML)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
+
+        // valeur de cuisineType non reconnu
+        if (cuisineType == null || cuisineType.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Le paramètre 'cuisineType' est invalide ou vide.")
+                    .build();
+        }
+
         //On recupere la reponse par une requette HTTP.
         String fullUrl = API_URL + "?type=public&app_id=" + APP_ID + "&app_key=" + APP_KEY + "&cuisineType=" + cuisineType;
 
-        String jsonResponse = client.target(fullUrl)
-                .request(MediaType.APPLICATION_JSON)
-                .get()
-                .readEntity(String.class);
+        Response apiResponse;
+        try {
+            apiResponse = client.target(fullUrl)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erreur lors de l'appel à l'API externe: " + e.getMessage())
+                    .build();
+        }
+
+        // Si l'API externe retourne un code autre que 200 on renvoie une erreur 500
+        if (apiResponse.getStatus() != 200) {
+            String errorMessage = apiResponse.readEntity(String.class);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erreur API externe (HTTP " + apiResponse.getStatus() + "): " + errorMessage)
+                    .build();
+        }
+
+        String jsonResponse = apiResponse.readEntity(String.class);
 
         //On convertit la reponse en un objet Recette.
         Recette recette = convertJsonToRecette(jsonResponse);
@@ -158,7 +182,9 @@ public class RestApp {
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.marshal(recette, xmlWriter);
         } catch (Exception e) {
-            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erreur lors de la génération du XML: " + e.getMessage())
+                    .build();
         }
 
         return Response.ok(xmlWriter.toString()).build();
