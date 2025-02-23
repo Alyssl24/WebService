@@ -1,4 +1,5 @@
 package maar.project;
+
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
@@ -10,7 +11,9 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
+import maar.project.recette.Ingredient;
 import maar.project.recette.Recette;
+import maar.project.recette.TypeDetails;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -34,70 +37,94 @@ public class RestApp {
             JsonObject rootJson = jsonReader.readObject();
 
             JsonObject recipeJson = rootJson.getJsonArray("hits")
-                    .getJsonObject(0)  // c ici qu'on récupère juste le premier elt de hits
+                    .getJsonObject(0)  // système de mémoïsation : on récupère le premier élément
                     .getJsonObject("recipe");
 
-            JsonArray ingredientsArray = recipeJson.getJsonArray("ingredientLines");
-            List<String> ingredientLines = new ArrayList<>();
-            if (ingredientsArray != null) {
-                for (int i = 0; i < ingredientsArray.size(); i++) {
-                    ingredientLines.add(ingredientsArray.getString(i));
+            System.out.println("ICI ON AFFICHE LE RECIPE JSON =>");
+            System.out.println(recipeJson);
+
+            // Récupération du tableau "ingredients" du JSON
+            JsonArray ingredientsDetailArray = recipeJson.getJsonArray("ingredients");
+            List<Ingredient> ingredients = new ArrayList<>();
+            if (ingredientsDetailArray != null) {
+                for (int i = 0; i < ingredientsDetailArray.size(); i++) {
+                    JsonObject ingredientJson = ingredientsDetailArray.getJsonObject(i);
+
+                    // "text" correspond ici au texte complet de l'ingrédient
+                    String texteComplet = ingredientJson.getString("text", "");
+                    // "food" peut servir de nom pur
+                    String nomPur = ingredientJson.getString("food", "");
+                    // Pour la quantité, on peut récupérer "quantity" et éventuellement "measure"
+                    String quantite = ingredientJson.containsKey("quantity")
+                            ? ingredientJson.getJsonNumber("quantity").toString()
+                            + (ingredientJson.containsKey("measure") ? " " + ingredientJson.getString("measure") : "")
+                            : "";
+                    // "image" si disponible
+                    String imageIngredient = ingredientJson.getString("image", "");
+
+                    Ingredient ing = new Ingredient(texteComplet, nomPur, quantite, imageIngredient);
+                    ingredients.add(ing);
                 }
             }
 
-            JsonArray TypeCuisineArray = recipeJson.getJsonArray("cuisineType");
-            List<String> TypeCuisineLines = new ArrayList<>();
-            if (TypeCuisineArray != null) {
-                for (int i = 0; i < TypeCuisineArray.size(); i++) {
-                    TypeCuisineLines.add(TypeCuisineArray.getString(i));
+            // Récupération des types depuis les tableaux JSON
+            JsonArray typeCuisineArray = recipeJson.getJsonArray("cuisineType");
+            List<String> typesCuisine = new ArrayList<>();
+            if (typeCuisineArray != null) {
+                for (int i = 0; i < typeCuisineArray.size(); i++) {
+                    typesCuisine.add(typeCuisineArray.getString(i));
                 }
             }
 
-            JsonArray TypeRepasArray = recipeJson.getJsonArray("mealType");
-            List<String> TypeRepasLines = new ArrayList<>();
-            if (TypeRepasArray != null) {
-                for (int i = 0; i < TypeRepasArray.size(); i++) {
-                    TypeRepasLines.add(TypeRepasArray.getString(i));
+            JsonArray typeRepasArray = recipeJson.getJsonArray("mealType");
+            List<String> typesRepas = new ArrayList<>();
+            if (typeRepasArray != null) {
+                for (int i = 0; i < typeRepasArray.size(); i++) {
+                    String value = typeRepasArray.getString(i);
+                    if (value.contains("/")) {
+                        // On sépare la chaîne par le caractère '/'
+                        String[] parts = value.split("/");
+                        for (String part : parts) {
+                            typesRepas.add(part.trim());
+                        }
+                    } else {
+                        typesRepas.add(value);
+                    }
                 }
             }
 
-            JsonArray TypePlatsArray = recipeJson.getJsonArray("dishType");
-            List<String> TypePlatsLines = new ArrayList<>();
-            if (TypePlatsArray != null) {
-                for (int i = 0; i < TypePlatsArray.size(); i++) {
-                    TypePlatsLines.add(TypePlatsArray.getString(i));
+            JsonArray typePlatArray = recipeJson.getJsonArray("dishType");
+            List<String> typesPlat = new ArrayList<>();
+            if (typePlatArray != null) {
+                for (int i = 0; i < typePlatArray.size(); i++) {
+                    typesPlat.add(typePlatArray.getString(i));
                 }
             }
 
-            double totalTime = recipeJson.containsKey("totalTime") ?
-                    recipeJson.getJsonNumber("totalTime").doubleValue() : 30.0;
+            // Conversion du temps total (en minutes) en format heure
+            double totalTime = recipeJson.containsKey("totalTime")
+                    ? recipeJson.getJsonNumber("totalTime").doubleValue()
+                    : 30.0;
             int totalMinutes = (int) totalTime;
             int hours = totalMinutes / 60;
             int minutes = totalMinutes % 60;
             LocalTime localTime = LocalTime.of(hours, minutes, 0);
             String timeFormatted = localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
 
+            // Création du TypeDetails pour regrouper les types de repas, plat et cuisine
+            TypeDetails typeDetails = new TypeDetails(typesRepas, typesPlat, typesCuisine);
+
+            // Construction de l'objet Recette
             recette = new Recette(
                     recipeJson.getString("uri"),
                     recipeJson.getString("label"),
-                    TypeRepasLines,
-                    TypePlatsLines,
-                    TypeCuisineLines,
+                    typeDetails,
                     timeFormatted,
                     recipeJson.getString("image"),
                     recipeJson.getString("url"),
-                    BigDecimal.valueOf(recipeJson.getJsonNumber("calories").doubleValue()),
-                    // il faudrait recuperer tout ca par rapport au tableau "ingredients" dans le json
-                    // le text complet est dans "ingredientsLines"
-                    // mais j'avoue que je n'y arrive pas donc si jamais tu peux voir pour le faire
-                    // attention ya des modif a faire dans le xsd (surtout quand l'elt en json est une list)
-                    // ingredientsLines est un peut fait n'importe comment car il prends les elts de "ingredientLines"
-                    "Exemple de texte complet de l'ingrédient",
-                    "NomPur Exemple",
-                    "1 portion",
-                    "https://example.com/ingredient.jpg",
-                    "Lait",
-                    ingredientLines
+                    ingredients,
+                    null,
+                    BigDecimal.valueOf(recipeJson.getJsonNumber("calories").doubleValue())
             );
 
         } catch (Exception e) {
@@ -107,10 +134,12 @@ public class RestApp {
         return recette;
     }
 
+
     @GET
     @Path("/meal/{cuisineType}")
     @Produces(MediaType.APPLICATION_XML)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
+        //On recupere la reponse par une requette HTTP.
         String fullUrl = API_URL + "?type=public&app_id=" + APP_ID + "&app_key=" + APP_KEY + "&cuisineType=" + cuisineType;
 
         String jsonResponse = client.target(fullUrl)
@@ -118,8 +147,10 @@ public class RestApp {
                 .get()
                 .readEntity(String.class);
 
+        //On convertit la reponse en un objet Recette.
         Recette recette = convertJsonToRecette(jsonResponse);
 
+        //On convertit ensuite l'objet en un fichier XML.
         StringWriter xmlWriter = new StringWriter();
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Recette.class);
