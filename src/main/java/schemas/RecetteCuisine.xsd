@@ -44,8 +44,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    <!-- Adaptation : allergenes est maintenant de type string -->
-    <xsd:element name="allergenes" type="xsd:string" minOccurs="0"/>
+    <xsd:element name="allergenes" type="xsd:string"/>
 
     <xsd:element name="types_cuisine">
         <xsd:complexType>
@@ -89,9 +88,9 @@
                 <xsd:element ref="temps_preparation"/>
                 <xsd:element ref="image_recette"/>
                 <xsd:element ref="url_origine"/>
-                <xsd:element ref="ingredients"/>
-                <xsd:element ref="allergenes" minOccurs="0"/>
                 <xsd:element ref="calories"/>
+                <xsd:element name="allergenes" type="xsd:string"/>
+                <xsd:element ref="ingredients"/>
             </xsd:sequence>
             <xsd:attribute name="id_recette" type="xsd:string" use="required"/>
         </xsd:complexType>

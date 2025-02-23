@@ -32,8 +32,8 @@ public class Recette {
     @XmlElement(name = "image_ingredient")
     private String imageIngredient;
 
-    @XmlElement(name = "allergene")
-    private String allergene;
+    @XmlElement(name = "allergenes")
+    private String allergenes;
 
     @XmlElementWrapper(name = "ingredients")
     @XmlElement(name = "ingredient")
@@ -43,7 +43,7 @@ public class Recette {
 
     public Recette(String idRecette, String nomPlat, TypeDetails typeDetails,
                    String tempsPreparation, String imageRecette, String urlOrigine,List<Ingredient> ingredients,
-                   String allergene, BigDecimal calories) {
+                   String allergenes, BigDecimal calories) {
         this.idRecette = idRecette;
         this.nomPlat = nomPlat;
         this.typeDetails = typeDetails;
@@ -51,7 +51,7 @@ public class Recette {
         this.imageRecette = imageRecette;
         this.urlOrigine = urlOrigine;
         this.ingredients = ingredients;
-        this.allergene = allergene;
+        this.allergenes = allergenes;
         this.calories = calories;
     }
 

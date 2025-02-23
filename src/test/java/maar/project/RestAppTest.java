@@ -25,13 +25,10 @@ public class RestAppTest {
                 .request(MediaType.APPLICATION_XML)
                 .get();
 
-        // Bufferiser l'entité pour pouvoir la relire plusieurs fois
-        response.bufferEntity();
+        response.bufferEntity(); //pour relire le truc sinon ca bloque la
 
-        // Vérification du code de retour
         Assertions.assertEquals(200, response.getStatus(), "Le code HTTP doit être 200 pour un paramètre valide.");
 
-        // Récupération et vérification du contenu XML
         String xmlOutput = response.readEntity(String.class);
         Assertions.assertNotNull(xmlOutput, "La réponse XML ne doit pas être nulle.");
         System.out.println("Test Success - XML output :\n" + xmlOutput);
