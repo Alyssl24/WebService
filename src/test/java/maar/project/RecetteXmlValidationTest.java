@@ -19,7 +19,7 @@ import java.io.StringWriter;
 public class RecetteXmlValidationTest {
 
     private final String BASE_URL = "http://localhost:8000/recipe/meal/";
-    private final String XSD_PATH = "src/main/java/schemas/RecetteCuisine.xsd"; // Chemin vers votre fichier XSD
+    private final String XSD_PATH = "src/main/resources/RecetteCuisine.xsd"; // Chemin vers votre fichier XSD
 
     @Test
     public void testXmlConformeAuXsd() throws Exception {
