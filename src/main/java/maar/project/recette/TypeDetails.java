@@ -28,4 +28,28 @@ public class TypeDetails {
     }
 
     // Getters & Setters
+
+    public List<String> getTypesRepas() {
+        return typesRepas;
+    }
+
+    public void setTypesRepas(List<String> typesRepas) {
+        this.typesRepas = typesRepas;
+    }
+
+    public List<String> getTypesPlat() {
+        return typesPlat;
+    }
+
+    public void setTypesPlat(List<String> typesPlat) {
+        this.typesPlat = typesPlat;
+    }
+
+    public List<String> getTypesCuisine() {
+        return typesCuisine;
+    }
+
+    public void setTypesCuisine(List<String> typesCuisine) {
+        this.typesCuisine = typesCuisine;
+    }
 }

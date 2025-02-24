@@ -57,4 +57,83 @@ public class Recette {
 
     // Getters & Setters
 
+    public String getIdRecette() {
+        return idRecette;
+    }
+
+    public void setIdRecette(String idRecette) {
+        this.idRecette = idRecette;
+    }
+
+    public String getNomPlat() {
+        return nomPlat;
+    }
+
+    public void setNomPlat(String nomPlat) {
+        this.nomPlat = nomPlat;
+    }
+
+    public TypeDetails getTypeDetails() {
+        return typeDetails;
+    }
+
+    public void setTypeDetails(TypeDetails typeDetails) {
+        this.typeDetails = typeDetails;
+    }
+
+    public String getTempsPreparation() {
+        return tempsPreparation;
+    }
+
+    public void setTempsPreparation(String tempsPreparation) {
+        this.tempsPreparation = tempsPreparation;
+    }
+
+    public String getImageRecette() {
+        return imageRecette;
+    }
+
+    public void setImageRecette(String imageRecette) {
+        this.imageRecette = imageRecette;
+    }
+
+    public String getUrlOrigine() {
+        return urlOrigine;
+    }
+
+    public void setUrlOrigine(String urlOrigine) {
+        this.urlOrigine = urlOrigine;
+    }
+
+    public BigDecimal getCalories() {
+        return calories;
+    }
+
+    public void setCalories(BigDecimal calories) {
+        this.calories = calories;
+    }
+
+    public String getImageIngredient() {
+        return imageIngredient;
+    }
+
+    public void setImageIngredient(String imageIngredient) {
+        this.imageIngredient = imageIngredient;
+    }
+
+    public String getAllergenes() {
+        return allergenes;
+    }
+
+    public void setAllergenes(String allergenes) {
+        this.allergenes = allergenes;
+    }
+
+    public List<Ingredient> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
+    }
 }

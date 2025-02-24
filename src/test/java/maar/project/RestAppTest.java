@@ -26,7 +26,6 @@ public class RestAppTest {
                 .get();
 
         response.bufferEntity(); //pour relire le truc sinon ca bloque la
-
         Assertions.assertEquals(200, response.getStatus(), "Le code HTTP doit être 200 pour un paramètre valide.");
 
         String xmlOutput = response.readEntity(String.class);
