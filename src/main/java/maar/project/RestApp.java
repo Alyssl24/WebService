@@ -29,8 +29,8 @@ import java.util.Random;
 public class RestApp {
 
     private static final String API_URL = "https://api.edamam.com/api/recipes/v2";
-    private static final String APP_ID = "5b00ff05";
-    private static final String APP_KEY = "d3807873187ac6b6d68f52a28f39a00e";
+    private static final String APP_ID = "c63c1b50";
+    private static final String APP_KEY = "9435486d5c699d9ea4b5d3f86ff0a035";
 
     private final Client client = ClientBuilder.newClient();
 
@@ -46,9 +46,6 @@ public class RestApp {
             // Sélection aléatoire d'une recette parmi les hits
             int randomIndex = RANDOM.nextInt(hits.size());
             JsonObject recipeJson = hits.getJsonObject(randomIndex).getJsonObject("recipe");
-
-            System.out.println("ICI ON AFFICHE LE RECIPE JSON =>");
-            System.out.println(recipeJson);
 
             // Récupération du tableau des ingrédients
             JsonArray ingredientsDetailArray = recipeJson.getJsonArray("ingredients");
