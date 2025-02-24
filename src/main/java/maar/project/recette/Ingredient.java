@@ -1,14 +1,24 @@
 package maar.project.recette;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {"texteComplet", "nomPur", "quantite", "imageIngredient"})
 public class Ingredient {
 
+    @XmlElement(name = "texte_complet")
     private String texteComplet;
+
+    @XmlElement(name = "nom_pur")
     private String nomPur;
+
+    @XmlElement(name = "quantite")
     private String quantite;
+
+    @XmlElement(name = "image_ingredient")
     private String imageIngredient;
 
     public Ingredient() {}
@@ -20,7 +30,6 @@ public class Ingredient {
         this.imageIngredient = imageIngredient;
     }
 
-    @XmlElement(name = "texte_complet")
     public String getTexteComplet() {
         return texteComplet;
     }
@@ -29,7 +38,6 @@ public class Ingredient {
         this.texteComplet = texteComplet;
     }
 
-    @XmlElement(name = "nom_pur")
     public String getNomPur() {
         return nomPur;
     }
@@ -38,7 +46,6 @@ public class Ingredient {
         this.nomPur = nomPur;
     }
 
-    @XmlElement(name = "quantite")
     public String getQuantite() {
         return quantite;
     }
@@ -47,7 +54,6 @@ public class Ingredient {
         this.quantite = quantite;
     }
 
-    @XmlElement(name = "image_ingredient")
     public String getImageIngredient() {
         return imageIngredient;
     }
