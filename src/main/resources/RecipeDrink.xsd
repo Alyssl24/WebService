@@ -21,19 +21,15 @@
         <xsd:restriction base="xsd:string"/>
     </xsd:simpleType>
 
-    <xsd:simpleType name="Preparation_Time">
-        <xsd:restriction base="xsd:duration"/>
-    </xsd:simpleType>
-
-    <xsd:simpleType name="Drink_Image">
+    <xsd:simpleType name="Image_URL">
         <xsd:restriction base="xsd:anyURI"/>
     </xsd:simpleType>
 
-    <xsd:simpleType name="Synthetic_Ingredient">
+    <xsd:simpleType name="Instructions">
         <xsd:restriction base="xsd:string"/>
     </xsd:simpleType>
 
-    <xsd:simpleType name="Instructions">
+    <xsd:simpleType name="Synthetic_Ingredient">
         <xsd:restriction base="xsd:string"/>
     </xsd:simpleType>
 
@@ -70,8 +66,7 @@
         <xsd:sequence>
             <xsd:element name="drink_name" type="Name"/>
             <xsd:element name="drink_details" type="Drink_Details"/>
-            <xsd:element name="preparation_time" type="Preparation_Time"/>
-            <xsd:element name="drink_image" type="Drink_Image"/>
+            <xsd:element name="drink_image" type="Image_URL" minOccurs="0"/>
             <xsd:element name="synthetic_ingredients" type="Synthetic_Ingredients"/>
             <xsd:element name="ingredient_details" type="Ingredient_Details"/>
             <xsd:element name="instructions" type="Instructions"/>
