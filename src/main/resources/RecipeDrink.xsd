@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns="http://www.mysite.com/drinks/v1"
+            targetNamespace="http://www.mysite.com/drinks/v1"
+            elementFormDefault="qualified">
+
+    <!-- Simple Types -->
+    <xsd:simpleType name="Name">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Contains_Alcohol">
+        <xsd:restriction base="xsd:boolean"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Drink_Category">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Glass_Type">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Preparation_Time">
+        <xsd:restriction base="xsd:duration"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Drink_Image">
+        <xsd:restriction base="xsd:anyURI"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Synthetic_Ingredient">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Instructions">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <!-- Complex Types -->
+    <xsd:complexType name="Drink_Details">
+        <xsd:sequence>
+            <xsd:element name="contains_alcohol" type="Contains_Alcohol"/>
+            <xsd:element name="drink_category" type="Drink_Category"/>
+            <xsd:element name="glass_type" type="Glass_Type"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Synthetic_Ingredients">
+        <xsd:sequence>
+            <xsd:element name="synthetic_ingredient" type="Synthetic_Ingredient" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Ingredient">
+        <xsd:sequence>
+            <xsd:element name="full_text" type="xsd:string"/>
+            <xsd:element name="pure_name" type="xsd:string"/>
+            <xsd:element name="quantity" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Ingredient_Details">
+        <xsd:sequence>
+            <xsd:element name="ingredient" type="Ingredient" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Drink_Recipe">
+        <xsd:sequence>
+            <xsd:element name="drink_name" type="Name"/>
+            <xsd:element name="drink_details" type="Drink_Details"/>
+            <xsd:element name="preparation_time" type="Preparation_Time"/>
+            <xsd:element name="drink_image" type="Drink_Image"/>
+            <xsd:element name="synthetic_ingredients" type="Synthetic_Ingredients"/>
+            <xsd:element name="ingredient_details" type="Ingredient_Details"/>
+            <xsd:element name="instructions" type="Instructions"/>
+        </xsd:sequence>
+        <xsd:attribute name="recipe_id" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <!-- Main Elements -->
+    <xsd:element name="drink_recipe" type="Drink_Recipe"/>
+    <xsd:element name="drink_details" type="Drink_Details"/>
+    <xsd:element name="synthetic_ingredients" type="Synthetic_Ingredients"/>
+    <xsd:element name="ingredient" type="Ingredient"/>
+    <xsd:element name="ingredient_details" type="Ingredient_Details"/>
+
+</xsd:schema>
