@@ -16,13 +16,12 @@ import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 import maar.project.drinks.*;
 import maar.project.recette.Ingredient;
-import maar.project.recette.Recette;
-import maar.project.recette.TypeDetails;
+import maar.project.recette.Recipe;
+import maar.project.recette.RecipeDetails;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,8 +39,8 @@ public class RestApp {
     // Instance statique de Random pour obtenir des index aléatoires
     private static final Random RANDOM = new Random();
 
-    public static Recette convertJsonToRecette(String jsonResponse) {
-        Recette recette = null;
+    public static Recipe convertJsonToRecette(String jsonResponse) {
+        Recipe recette = null;
         try (JsonReader jsonReader = Json.createReader(new StringReader(jsonResponse))) {
             JsonObject rootJson = jsonReader.readObject();
             JsonArray hits = rootJson.getJsonArray("hits");
@@ -123,21 +122,21 @@ public class RestApp {
                 }
             }
 
-            // Conversion du temps total (en minutes) en format heure (HH:mm:ss)
+            // Conversion du temps total (en minutes) en format ISO 8601 (PTxxHxxMxxS)
             double totalTime = recipeJson.containsKey("totalTime")
                     ? recipeJson.getJsonNumber("totalTime").doubleValue()
                     : 30.0;
             int totalMinutes = (int) totalTime;
-            int hours = totalMinutes / 60;
-            int minutes = totalMinutes % 60;
-            LocalTime localTime = LocalTime.of(hours, minutes, 0);
-            String timeFormatted = localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
+            Duration duration = Duration.ofMinutes(totalMinutes);
+            // Formater la durée en ISO 8601
+            String timeFormatted = duration.toString();
+
 
             // Création de l'objet TypeDetails
-            TypeDetails typeDetails = new TypeDetails(typesRepas, typesPlat, typesCuisine);
+            RecipeDetails typeDetails = new RecipeDetails(typesRepas, typesPlat, typesCuisine);
 
             // Construction de l'objet Recette
-            recette = new Recette(
+            recette = new Recipe(
                     recipeJson.getString("uri"),
                     recipeJson.getString("label"),
                     typeDetails,
@@ -201,12 +200,12 @@ public class RestApp {
                     .build();
         }
 
-        Recette recette = convertJsonToRecette(jsonResponse);
+        Recipe recette = convertJsonToRecette(jsonResponse);
 
         // Génération du XML à partir de l'objet Recette
         StringWriter xmlWriter = new StringWriter();
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Recette.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Recipe.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             marshaller.marshal(recette, xmlWriter);
