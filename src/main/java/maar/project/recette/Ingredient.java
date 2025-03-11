@@ -1,57 +1,54 @@
 package maar.project.recette;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"texteComplet", "nomPur", "quantite", "imageIngredient"})
+@XmlType(propOrder = {"fullText", "pureName", "quantity", "imageIngredient"})
 public class Ingredient {
 
-    @XmlElement(name = "texte_complet")
-    private String texteComplet;
+    @XmlElement(name = "full_text")
+    private String fullText;
 
-    @XmlElement(name = "nom_pur")
-    private String nomPur;
+    @XmlElement(name = "pure_name")
+    private String pureName;
 
-    @XmlElement(name = "quantite")
-    private String quantite;
+    @XmlElement(name = "quantity")
+    private String quantity;
 
-    @XmlElement(name = "image_ingredient")
+    @XmlElement(name = "image_ingredient", nillable = true)
     private String imageIngredient;
 
     public Ingredient() {}
 
-    public Ingredient(String texteComplet, String nomPur, String quantite, String imageIngredient) {
-        this.texteComplet = texteComplet;
-        this.nomPur = nomPur;
-        this.quantite = quantite;
+    public Ingredient(String fullText, String pureName, String quantity, String imageIngredient) {
+        this.fullText = fullText;
+        this.pureName = pureName;
+        this.quantity = quantity;
         this.imageIngredient = imageIngredient;
     }
 
-    public String getTexteComplet() {
-        return texteComplet;
+    public String getFullText() {
+        return fullText;
     }
 
-    public void setTexteComplet(String texteComplet) {
-        this.texteComplet = texteComplet;
+    public void setFullText(String fullText) {
+        this.fullText = fullText;
     }
 
-    public String getNomPur() {
-        return nomPur;
+    public String getPureName() {
+        return pureName;
     }
 
-    public void setNomPur(String nomPur) {
-        this.nomPur = nomPur;
+    public void setPureName(String pureName) {
+        this.pureName = pureName;
     }
 
-    public String getQuantite() {
-        return quantite;
+    public String getQuantity() {
+        return quantity;
     }
 
-    public void setQuantite(String quantite) {
-        this.quantite = quantite;
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
     }
 
     public String getImageIngredient() {

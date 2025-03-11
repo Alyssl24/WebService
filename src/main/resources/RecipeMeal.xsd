@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns="http://www.monsite.com/recipes/v1"
+            targetNamespace="http://www.monsite.com/recipes/v1"
+            elementFormDefault="qualified">
+
+    <!-- Définition des types simples -->
+    <xsd:simpleType name="Name">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Meal_Type">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="teatime"/>
+            <xsd:enumeration value="lunch/dinner"/>
+            <xsd:enumeration value="snack"/>
+            <xsd:enumeration value="breakfast"/>
+            <xsd:enumeration value="brunch"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Dish_Type">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Kitchen_Type">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Time">
+        <xsd:restriction base="xsd:time"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Image">
+        <xsd:restriction base="xsd:anyURI"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="URL">
+        <xsd:restriction base="xsd:anyURI"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Calories">
+        <xsd:restriction base="xsd:decimal"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Allergens">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Full_Text">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Pure_Name">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="Quantity">
+        <xsd:restriction base="xsd:string"/>
+    </xsd:simpleType>
+
+    <!-- Définition du type Ingredient -->
+    <xsd:complexType name="Ingredient_Type">
+        <xsd:sequence>
+            <xsd:element name="full_text" type="Full_Text"/>
+            <xsd:element name="pure_name" type="Pure_Name"/>
+            <xsd:element name="quantity" type="Quantity"/>
+            <xsd:element name="ingredient_image" type="Image" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Définition du type Ingredients pour contenir plusieurs ingrédients -->
+    <xsd:complexType name="Ingredients_Type">
+        <xsd:sequence>
+            <xsd:element name="ingredient" type="Ingredient_Type" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Définition du type Cuisine_Types -->
+    <xsd:complexType name="Cuisine_Types">
+        <xsd:sequence>
+            <xsd:element name="kitchen_type" type="Kitchen_Type" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Définition du type Recipe_Details -->
+    <xsd:complexType name="Recipe_Details">
+        <xsd:sequence>
+            <xsd:element name="meal_type" type="Meal_Type" maxOccurs="unbounded"/>
+            <xsd:element name="dish_types" type="Dish_Type" maxOccurs="unbounded"/>
+            <xsd:element name="cuisine_types" type="Cuisine_Types"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Définition du type Recipe -->
+    <xsd:complexType name="Recipe">
+        <xsd:sequence>
+            <xsd:element name="recipe_name" type="Name"/>
+            <xsd:element name="recipe_details" type="Recipe_Details"/>
+            <xsd:element name="preparation_time" type="Time"/>
+            <xsd:element name="recipe_image" type="Image"/>
+            <xsd:element name="source_url" type="URL"/>
+            <xsd:element name="calories" type="Calories"/>
+            <xsd:element name="allergens" type="Allergens"/>
+            <xsd:element name="ingredients" type="Ingredients_Type"/>
+        </xsd:sequence>
+        <xsd:attribute name="recipe_id" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <!-- Définition des éléments principaux -->
+    <xsd:element name="ingredient" type="Ingredient_Type"/>
+    <xsd:element name="ingredients" type="Ingredients_Type"/>
+    <xsd:element name="cuisine_types" type="Cuisine_Types"/>
+    <xsd:element name="recipe_details" type="Recipe_Details"/>
+    <xsd:element name="recipe" type="Recipe"/>
+
+</xsd:schema>

@@ -4,18 +4,18 @@ import jakarta.xml.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-@XmlRootElement(name = "recette")
+@XmlRootElement(name = "recipe")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Recette {
+public class Recipe {
 
-    @XmlAttribute(name = "id_recette", required = true)
-    private String idRecette;
+    @XmlAttribute(name = "recipe_id", required = true)
+    private String RecipeId;
 
-    @XmlElement(name = "nom_plat")
+    @XmlElement(name = "name_recipe")
     private String nomPlat;
 
     @XmlElement(name = "type_details")
-    private TypeDetails typeDetails;
+    private RecipeDetails typeDetails;
 
     @XmlElement(name = "temps_preparation")
     private String tempsPreparation;
@@ -29,9 +29,6 @@ public class Recette {
     @XmlElement(name = "calories")
     private BigDecimal calories;
 
-    @XmlElement(name = "image_ingredient")
-    private String imageIngredient;
-
     @XmlElement(name = "allergenes")
     private String allergenes;
 
@@ -39,12 +36,12 @@ public class Recette {
     @XmlElement(name = "ingredient")
     private List<Ingredient> ingredients;
 
-    public Recette() {}
+    public Recipe() {}
 
-    public Recette(String idRecette, String nomPlat, TypeDetails typeDetails,
-                   String tempsPreparation, String imageRecette, String urlOrigine,List<Ingredient> ingredients,
-                   String allergenes, BigDecimal calories) {
-        this.idRecette = idRecette;
+    public Recipe(String RecipeId, String nomPlat, RecipeDetails typeDetails,
+                  String tempsPreparation, String imageRecette, String urlOrigine,
+                  List<Ingredient> ingredients, String allergenes, BigDecimal calories) {
+        this.RecipeId = RecipeId;
         this.nomPlat = nomPlat;
         this.typeDetails = typeDetails;
         this.tempsPreparation = tempsPreparation;
@@ -56,13 +53,12 @@ public class Recette {
     }
 
     // Getters & Setters
-
-    public String getIdRecette() {
-        return idRecette;
+    public String getRecipeId() {
+        return RecipeId;
     }
 
-    public void setIdRecette(String idRecette) {
-        this.idRecette = idRecette;
+    public void setRecipeId(String idRecette) {
+        this.RecipeId = idRecette;
     }
 
     public String getNomPlat() {
@@ -73,11 +69,11 @@ public class Recette {
         this.nomPlat = nomPlat;
     }
 
-    public TypeDetails getTypeDetails() {
+    public RecipeDetails getTypeDetails() {
         return typeDetails;
     }
 
-    public void setTypeDetails(TypeDetails typeDetails) {
+    public void setTypeDetails(RecipeDetails typeDetails) {
         this.typeDetails = typeDetails;
     }
 
@@ -111,14 +107,6 @@ public class Recette {
 
     public void setCalories(BigDecimal calories) {
         this.calories = calories;
-    }
-
-    public String getImageIngredient() {
-        return imageIngredient;
-    }
-
-    public void setImageIngredient(String imageIngredient) {
-        this.imageIngredient = imageIngredient;
     }
 
     public String getAllergenes() {
