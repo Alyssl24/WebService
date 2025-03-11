@@ -214,4 +214,76 @@ public class RestApp {
         }
         return Response.ok(xmlWriter.toString()).build();
     }
+
+    private static final String API_URL_DRINK = "https://www.thecocktaildb.com/api/json/v1/1/";
+
+    @GET
+    @Path("/drink")
+    public Response getDrink(@QueryParam("alcoholic") String alcoholic) {
+        Response apiResponse;
+        String filterPath;
+
+        if (alcoholic == null) {
+            filterPath = "random.php";
+        } else {
+            switch (alcoholic) {
+                case "true":
+                    filterPath = "filter.php?a=Alcoholic";
+                    break;
+                case "false":
+                    filterPath = "filter.php?a=Non_Alcoholic";
+                    break;
+                default:
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Le paramètre 'alcoholic' est invalide ou vide.")
+                            .build();
+            }
+        }
+
+        String fullUrl = API_URL_DRINK + filterPath;
+        try {
+            apiResponse = client.target(fullUrl)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erreur lors de l'appel à l'API externe: " + e.getMessage())
+                    .build();
+        }
+
+        String jsonResponse = apiResponse.readEntity(String.class);
+
+        if (alcoholic == null) {
+            return Response.ok(jsonResponse).build();
+        }
+
+        // Lire le JSON et sélectionner une boisson aléatoire
+        try (JsonReader jsonReader = Json.createReader(new StringReader(jsonResponse))) {
+            JsonObject rootJson = jsonReader.readObject();
+            JsonArray drinksArray = rootJson.getJsonArray("drinks");
+
+            if (drinksArray == null || drinksArray.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\":\"Aucune boisson trouvée.\"}")
+                        .build();
+            }
+
+            Random random = new Random();
+            int randomIndex = random.nextInt(drinksArray.size());
+            JsonObject selectedDrink = drinksArray.getJsonObject(randomIndex);
+            String drinkId = selectedDrink.getString("idDrink");
+
+            String detailsUrl = API_URL_DRINK + "lookup.php?i=" + drinkId;
+            Response detailsResponse = client.target(detailsUrl)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get();
+
+            return Response.ok(detailsResponse.readEntity(String.class)).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"Erreur lors du traitement des données JSON: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
 }
