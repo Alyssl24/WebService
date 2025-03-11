@@ -13,6 +13,8 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import maar.project.drinks.*;
 import maar.project.recette.Ingredient;
 import maar.project.recette.Recette;
 import maar.project.recette.TypeDetails;
@@ -22,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -215,10 +218,13 @@ public class RestApp {
         return Response.ok(xmlWriter.toString()).build();
     }
 
+
+    // API BOISSONS PART
     private static final String API_URL_DRINK = "https://www.thecocktaildb.com/api/json/v1/1/";
 
     @GET
     @Path("/drink")
+    @Produces(MediaType.APPLICATION_XML)
     public Response getDrink(@QueryParam("alcoholic") String alcoholic) {
         Response apiResponse;
         String filterPath;
@@ -235,7 +241,7 @@ public class RestApp {
                     break;
                 default:
                     return Response.status(Response.Status.BAD_REQUEST)
-                            .entity("Le paramètre 'alcoholic' est invalide ou vide.")
+                            .entity("<error>Le paramètre 'alcoholic' est invalide ou vide.</error>")
                             .build();
             }
         }
@@ -247,24 +253,23 @@ public class RestApp {
                     .get();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erreur lors de l'appel à l'API externe: " + e.getMessage())
+                    .entity("<error>Erreur lors de l'appel à l'API externe: " + e.getMessage() + "</error>")
                     .build();
         }
 
         String jsonResponse = apiResponse.readEntity(String.class);
 
         if (alcoholic == null) {
-            return Response.ok(jsonResponse).build();
+            return Response.ok(convertJsonToXml(jsonResponse)).build();
         }
 
-        // Lire le JSON et sélectionner une boisson aléatoire
         try (JsonReader jsonReader = Json.createReader(new StringReader(jsonResponse))) {
             JsonObject rootJson = jsonReader.readObject();
             JsonArray drinksArray = rootJson.getJsonArray("drinks");
 
             if (drinksArray == null || drinksArray.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\":\"Aucune boisson trouvée.\"}")
+                        .entity("<error>Aucune boisson trouvée.</error>")
                         .build();
             }
 
@@ -278,12 +283,79 @@ public class RestApp {
                     .request(MediaType.APPLICATION_JSON)
                     .get();
 
-            return Response.ok(detailsResponse.readEntity(String.class)).build();
+            return Response.ok(convertJsonToXml(detailsResponse.readEntity(String.class))).build();
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"Erreur lors du traitement des données JSON: " + e.getMessage() + "\"}")
+                    .entity("<error>Erreur lors du traitement des données JSON: " + e.getMessage() + "</error>")
                     .build();
         }
     }
+
+    private String convertJsonToXml(String jsonResponse) {
+        try {
+            // Lire le JSON
+            JsonReader jsonReader = Json.createReader(new StringReader(jsonResponse));
+            JsonObject rootJson = jsonReader.readObject();
+            JsonArray drinksArray = rootJson.getJsonArray("drinks");
+
+            if (drinksArray == null || drinksArray.isEmpty()) {
+                return "<error>Aucune boisson trouvée.</error>";
+            }
+
+            JsonObject drinkJson = drinksArray.getJsonObject(0); // Prendre le premier élément
+
+            DrinkRecipe drinkRecipe = new DrinkRecipe(
+                    drinkJson.getString("idDrink"),
+                    drinkJson.getString("strDrink"),
+                    new DrinkDetails(
+                            "Alcoholic".equals(drinkJson.getString("strAlcoholic")), // Convertir en booléen
+                            drinkJson.getString("strCategory"),
+                            drinkJson.getString("strGlass")
+                    ),
+                    drinkJson.getString("strDrinkThumb"),
+                    extractSyntheticIngredients(drinkJson),
+                    extractIngredients(drinkJson),
+                    drinkJson.getString("strInstructions")
+            );
+
+            JAXBContext jaxbContext = JAXBContext.newInstance(DrinkRecipe.class);
+            StringWriter xmlWriter = new StringWriter();
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.marshal(drinkRecipe, xmlWriter);
+
+            return xmlWriter.toString();
+
+        } catch (Exception e) {
+            return "<error>Erreur lors de la conversion JSON vers XML: " + e.getMessage() + "</error>";
+        }
+    }
+
+    private SyntheticIngredients extractSyntheticIngredients(JsonObject drinkJson) {
+        List<String> syntheticList = new ArrayList<>();
+        if (drinkJson.containsKey("strTags") && drinkJson.get("strTags") != JsonValue.NULL) {
+            syntheticList = Arrays.asList(drinkJson.getString("strTags").split(","));
+        }
+        return new SyntheticIngredients(syntheticList);
+    }
+
+    private IngredientDetails extractIngredients(JsonObject drinkJson) {
+        List<IngredientDrink> ingredients = new ArrayList<>();
+        for (int i = 1; i <= 15; i++) {  // Les ingrédients sont numérotés de 1 à 15
+            String ingredientKey = "strIngredient" + i;
+            String measureKey = "strMeasure" + i;
+
+            if (drinkJson.containsKey(ingredientKey) && drinkJson.get(ingredientKey) != JsonValue.NULL) {
+                String ingredient = drinkJson.getString(ingredientKey, "");
+                String measure = drinkJson.getString(measureKey, "");
+                if (!ingredient.isEmpty()) {
+                    ingredients.add(new IngredientDrink(ingredient, ingredient, measure));
+                }
+            }
+        }
+        return new IngredientDetails(ingredients);
+    }
+
+
 }
