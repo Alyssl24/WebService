@@ -17,7 +17,5 @@ public class SyntheticIngredients {
     public SyntheticIngredients(List<String> syntheticIngredient) {
         this.syntheticIngredient = syntheticIngredient;
     }
-
-    // Getters et Setters
 }
 

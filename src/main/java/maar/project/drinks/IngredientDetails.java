@@ -17,7 +17,5 @@ public class IngredientDetails {
     public IngredientDetails(List<IngredientDrink> ingredients) {
         this.ingredients = ingredients;
     }
-
-    // Getters et Setters
 }
 

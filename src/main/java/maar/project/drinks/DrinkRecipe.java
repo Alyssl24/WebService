@@ -40,6 +40,4 @@ public class DrinkRecipe {
         this.ingredientDetails = ingredientDetails;
         this.instructions = instructions;
     }
-
-    // Getters et Setters
 }
