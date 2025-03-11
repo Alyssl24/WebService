@@ -240,6 +240,7 @@ public class RestApp {
                     filterPath = "filter.php?a=Non_Alcoholic";
                     break;
                 default:
+                    // LA faut mettre une erreur 500
                     return Response.status(Response.Status.BAD_REQUEST)
                             .entity("<error>Le paramètre 'alcoholic' est invalide ou vide.</error>")
                             .build();
