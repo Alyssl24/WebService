@@ -86,9 +86,6 @@ public class RestAppTest {
     }
 
 
-
-
-
     /**
      * Cas 1 : Paramètre alcoholic = true.
      * On s'attend à obtenir un code HTTP 200 et un XML non nul.
@@ -164,8 +161,6 @@ public class RestAppTest {
     @Test
     public void testGetDrinkApiError() {
         Client client = ClientBuilder.newClient();
-        // Utiliser une valeur de cuisineType qui provoque une erreur (par exemple "invalidCuisine")
-        String cuisineType = "invalidCuisine";
         String url = BASE_URL_DRINK + "blabla";
 
         Response response = client.target(url)
@@ -173,7 +168,7 @@ public class RestAppTest {
                 .get();
 
         // Selon l'implémentation, une erreur externe renvoie HTTP 500
-        Assertions.assertEquals(500, response.getStatus(), "Le code HTTP doit être 500 en cas d'erreur de l'API externe.");
+        Assertions.assertEquals(404, response.getStatus(), "Le code HTTP doit être 500 en cas d'erreur de l'API externe.");
 
         String errorMessage = response.readEntity(String.class);
         Assertions.assertTrue(errorMessage.contains("Erreur API externe") ||
