@@ -294,11 +294,25 @@ public class RestApp {
 
     private SyntheticIngredients extractSyntheticIngredients(JsonObject drinkJson) {
         List<String> syntheticList = new ArrayList<>();
-        if (drinkJson.containsKey("strTags") && drinkJson.get("strTags") != JsonValue.NULL) {
-            syntheticList = Arrays.asList(drinkJson.getString("strTags").split(","));
+
+        for (int i = 1; i <= 15; i++) {
+            String ingredientKey = "strIngredient" + i;
+
+            if (drinkJson.containsKey(ingredientKey) && drinkJson.get(ingredientKey) != JsonValue.NULL) {
+                String ingredient = drinkJson.getString(ingredientKey).trim();
+                if (!ingredient.isEmpty()) {
+                    syntheticList.add(ingredient);
+                }
+            }
         }
+        if (syntheticList.isEmpty()) {
+            syntheticList.add("Unknown");
+        }
+
         return new SyntheticIngredients(syntheticList);
     }
+
+
 
     private IngredientDetails extractIngredients(JsonObject drinkJson) {
         List<IngredientDrink> ingredients = new ArrayList<>();

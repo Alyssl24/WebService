@@ -2,7 +2,7 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns="http://www.mysite.com/drinks/v1"
             targetNamespace="http://www.mysite.com/drinks/v1"
-            elementFormDefault="qualified">
+            elementFormDefault="unqualified">
 
     <!-- Simple Types -->
     <xsd:simpleType name="Name">
@@ -82,3 +82,4 @@
     <xsd:element name="ingredient_details" type="Ingredient_Details"/>
 
 </xsd:schema>
+
