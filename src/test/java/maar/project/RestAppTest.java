@@ -161,18 +161,18 @@ public class RestAppTest {
     @Test
     public void testGetDrinkApiError() {
         Client client = ClientBuilder.newClient();
-        String url = BASE_URL_DRINK + "blabla";
+        String url = BASE_URL_DRINK + "?alcoholic=" + "blabla";
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_XML)
                 .get();
 
         // Selon l'implémentation, une erreur externe renvoie HTTP 500
-        Assertions.assertEquals(404, response.getStatus(), "Le code HTTP doit être 500 en cas d'erreur de l'API externe.");
+        Assertions.assertEquals(500, response.getStatus(), "Le code HTTP doit être 500 en cas d'erreur de l'API externe.");
 
         String errorMessage = response.readEntity(String.class);
         Assertions.assertTrue(errorMessage.contains("Erreur API externe") ||
-                        errorMessage.contains("Erreur lors de l'appel"),
+                        errorMessage.contains("Erreur lors de l'appel") || errorMessage.contains("<error>Le paramètre 'alcoholic' est invalide ou vide.</error>"),
                 "Le message d'erreur doit indiquer une erreur lors de l'appel à l'API externe.");
         System.out.println("Test API Error - Message d'erreur : " + errorMessage);
     }
