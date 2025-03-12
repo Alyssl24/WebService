@@ -4,7 +4,6 @@ import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
-import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -13,17 +12,14 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
 import maar.project.drinks.*;
-import maar.project.recette.Ingredient;
-import maar.project.recette.Recipe;
-import maar.project.recette.RecipeDetails;
+import maar.project.meal.*;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -79,9 +75,9 @@ public class RestApp {
             }
 
             // Gestion des types (cuisine, repas, plat) avec vérification du type
+            MealTypes typesRepas = new MealTypes(extractJsonArrayAsList(recipeJson, "mealType"));
+            DishTypes typesPlat = new DishTypes(extractJsonArrayAsList(recipeJson, "dishType"));
             List<String> typesCuisine = extractJsonArrayAsList(recipeJson, "cuisineType");
-            List<String> typesRepas = extractJsonArrayAsList(recipeJson, "mealType");
-            List<String> typesPlat = extractJsonArrayAsList(recipeJson, "dishType");
 
             // Conversion du temps total (en minutes) en format ISO 8601 (PTxxHxxMxxS)
             String timeFormatted = "PT30M"; // Valeur par défaut

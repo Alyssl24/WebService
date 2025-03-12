@@ -1,4 +1,4 @@
-package maar.project.recette;
+package maar.project.meal;
 
 import jakarta.xml.bind.annotation.*;
 
@@ -15,7 +15,7 @@ public class Ingredient {
     @XmlElement(name = "quantity")
     private String quantity;
 
-    @XmlElement(name = "image_ingredient", nillable = true)
+    @XmlElement(name = "ingredient_image")
     private String imageIngredient;
 
     public Ingredient() {}

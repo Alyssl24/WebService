@@ -1,19 +1,18 @@
-package maar.project.recette;
+package maar.project.meal;
 
 import jakarta.xml.bind.annotation.*;
+
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {"mealTypes", "dishTypes", "cuisineTypes"})
 public class RecipeDetails {
 
-    @XmlElementWrapper(name = "meal_types")
-    @XmlElement(name = "meal_type")
-    private List<String> mealTypes;
+    @XmlElement(name = "meal_types")
+    private MealTypes mealTypes; // Utilisation de la classe MealTypes
 
-    @XmlElementWrapper(name = "dish_types")
-    @XmlElement(name = "dish_type")
-    private List<String> dishTypes;
+    @XmlElement(name = "dish_types")
+    private DishTypes dishTypes; // Utilisation de la classe DishTypes
 
     @XmlElementWrapper(name = "cuisine_types")
     @XmlElement(name = "kitchen_type")
@@ -21,25 +20,25 @@ public class RecipeDetails {
 
     public RecipeDetails() {}
 
-    public RecipeDetails(List<String> mealTypes, List<String> dishTypes, List<String> cuisineTypes) {
+    public RecipeDetails(MealTypes mealTypes, DishTypes dishTypes, List<String> cuisineTypes) {
         this.mealTypes = mealTypes;
         this.dishTypes = dishTypes;
         this.cuisineTypes = cuisineTypes;
     }
 
-    public List<String> getMealTypes() {
+    public MealTypes getMealTypes() {
         return mealTypes;
     }
 
-    public void setMealTypes(List<String> mealTypes) {
+    public void setMealTypes(MealTypes mealTypes) {
         this.mealTypes = mealTypes;
     }
 
-    public List<String> getDishTypes() {
+    public DishTypes getDishTypes() {
         return dishTypes;
     }
 
-    public void setDishTypes(List<String> dishTypes) {
+    public void setDishTypes(DishTypes dishTypes) {
         this.dishTypes = dishTypes;
     }
 
