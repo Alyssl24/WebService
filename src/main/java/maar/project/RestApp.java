@@ -36,7 +36,6 @@ public class RestApp {
 
     private final Client client = ClientBuilder.newClient();
 
-    // Instance statique de Random pour obtenir des index aléatoires
     private static final Random RANDOM = new Random();
 
     public static Recipe convertJsonToRecette(String jsonResponse) {
@@ -45,113 +44,79 @@ public class RestApp {
             JsonObject rootJson = jsonReader.readObject();
             JsonArray hits = rootJson.getJsonArray("hits");
 
-            // Sélection aléatoire d'une recette parmi les hits
+            if (hits == null || hits.isEmpty()) {
+                return null; // Aucune recette trouvée
+            }
+
+            // Sélection random d'une recette parmi les hits
             int randomIndex = RANDOM.nextInt(hits.size());
             JsonObject recipeJson = hits.getJsonObject(randomIndex).getJsonObject("recipe");
 
-            // Récupération du tableau des ingrédients
-            JsonArray ingredientsDetailArray = recipeJson.getJsonArray("ingredients");
+            // Récupération des informations principales
+            String uri = getSafeJsonString(recipeJson, "uri");
+            String label = getSafeJsonString(recipeJson, "label");
+            String image = getSafeJsonString(recipeJson, "image");
+            String url = getSafeJsonString(recipeJson, "url");
+
+            // Gestion des ingrédients
             List<Ingredient> ingredients = new ArrayList<>();
+            JsonArray ingredientsDetailArray = recipeJson.getJsonArray("ingredients");
             if (ingredientsDetailArray != null) {
-                for (int i = 0; i < ingredientsDetailArray.size(); i++) {
-                    JsonObject ingredientJson = ingredientsDetailArray.getJsonObject(i);
-                    String texteComplet = ingredientJson.getString("text", "");
-                    String nomPur = ingredientJson.getString("food", "");
-                    String quantite = ingredientJson.containsKey("quantity")
-                            ? ingredientJson.getJsonNumber("quantity").toString()
-                            + (ingredientJson.containsKey("measure") ? " " + ingredientJson.getString("measure") : "")
-                            : "";
-                    String imageIngredient = ingredientJson.getString("image", "");
-                    Ingredient ing = new Ingredient(texteComplet, nomPur, quantite, imageIngredient);
-                    ingredients.add(ing);
-                }
-            }
-
-            // Récupération des types (cuisine, repas, plat)
-            List<String> typesCuisine = new ArrayList<>();
-            JsonArray typeCuisineArray = recipeJson.getJsonArray("cuisineType");
-            if (typeCuisineArray != null) {
-                for (int i = 0; i < typeCuisineArray.size(); i++) {
-                    JsonValue value = typeCuisineArray.get(i);
-                    String s;
-                    if (value.getValueType() == JsonValue.ValueType.STRING) {
-                        s = ((JsonString) value).getString();
-                    } else {
-                        s = value.toString();
-                        if (s.startsWith("\"") && s.endsWith("\"")) {
-                            s = s.substring(1, s.length() - 1);
-                        }
+                for (JsonValue jsonValue : ingredientsDetailArray) {
+                    if (jsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                        JsonObject ingredientJson = jsonValue.asJsonObject();
+                        String texteComplet = getSafeJsonString(ingredientJson, "text");
+                        String nomPur = getSafeJsonString(ingredientJson, "food");
+                        String quantite = ingredientJson.containsKey("quantity")
+                                ? ingredientJson.getJsonNumber("quantity").toString() +
+                                (ingredientJson.containsKey("measure") ? " " + getSafeJsonString(ingredientJson, "measure") : "")
+                                : "";
+                        String imageIngredient = getSafeJsonString(ingredientJson, "image");
+                        ingredients.add(new Ingredient(texteComplet, nomPur, quantite, imageIngredient));
                     }
-                    typesCuisine.add(s);
                 }
             }
 
-            List<String> typesRepas = new ArrayList<>();
-            JsonArray typeRepasArray = recipeJson.getJsonArray("mealType");
-            if (typeRepasArray != null) {
-                for (int i = 0; i < typeRepasArray.size(); i++) {
-                    JsonValue value = typeRepasArray.get(i);
-                    String s;
-                    if (value.getValueType() == JsonValue.ValueType.STRING) {
-                        s = ((JsonString) value).getString();
-                    } else {
-                        s = value.toString();
-                        if (s.startsWith("\"") && s.endsWith("\"")) {
-                            s = s.substring(1, s.length() - 1);
-                        }
-                    }
-                    typesRepas.add(s);
-                }
+            // Gestion des types (cuisine, repas, plat)
+            List<String> typesCuisine = extractJsonArrayAsList(recipeJson, "cuisineType");
+            List<String> typesRepas = extractJsonArrayAsList(recipeJson, "mealType");
+            List<String> typesPlat = extractJsonArrayAsList(recipeJson, "dishType");
+
+            // Conversion du temps total en format ISO 8601
+            String timeFormatted = "PT30M"; // Valeur par défaut
+            if (recipeJson.containsKey("totalTime") && recipeJson.get("totalTime").getValueType() == JsonValue.ValueType.NUMBER) {
+                int totalMinutes = recipeJson.getJsonNumber("totalTime").intValue();
+                timeFormatted = Duration.ofMinutes(totalMinutes).toString();
             }
 
-            List<String> typesPlat = new ArrayList<>();
-            JsonArray typePlatArray = recipeJson.getJsonArray("dishType");
-            if (typePlatArray != null) {
-                for (int i = 0; i < typePlatArray.size(); i++) {
-                    JsonValue value = typePlatArray.get(i);
-                    String s;
-                    if (value.getValueType() == JsonValue.ValueType.STRING) {
-                        s = ((JsonString) value).getString();
-                    } else {
-                        s = value.toString();
-                        if (s.startsWith("\"") && s.endsWith("\"")) {
-                            s = s.substring(1, s.length() - 1);
-                        }
-                    }
-                    typesPlat.add(s);
-                }
-            }
-
-            // Conversion du temps total (en minutes) en format ISO 8601 (PTxxHxxMxxS)
-            double totalTime = recipeJson.containsKey("totalTime")
-                    ? recipeJson.getJsonNumber("totalTime").doubleValue()
-                    : 30.0;
-            int totalMinutes = (int) totalTime;
-            Duration duration = Duration.ofMinutes(totalMinutes);
-            // Formater la durée en ISO 8601
-            String timeFormatted = duration.toString();
-
+            // Récupération des allergènes à partir de `healthLabels`
+            List<String> healthLabels = extractJsonArrayAsList(recipeJson, "healthLabels");
+            String allergenes = String.join(", ", healthLabels); // Convertir la liste en une seule chaîne
 
             // Création de l'objet TypeDetails
             RecipeDetails typeDetails = new RecipeDetails(typesRepas, typesPlat, typesCuisine);
 
             // Construction de l'objet Recette
             recette = new Recipe(
-                    recipeJson.getString("uri"),
-                    recipeJson.getString("label"),
+                    uri,
+                    label,
                     typeDetails,
                     timeFormatted,
-                    recipeJson.getString("image"),
-                    recipeJson.getString("url"),
+                    image,
+                    url,
                     ingredients,
-                    "", // allergènes sous forme de chaîne vide
-                    BigDecimal.valueOf(recipeJson.getJsonNumber("calories").doubleValue())
+                    allergenes, // Ajout des allergènes
+                    BigDecimal.valueOf(recipeJson.containsKey("calories")
+                            ? recipeJson.getJsonNumber("calories").doubleValue()
+                            : 0.0) // Valeur par défaut
             );
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return recette;
     }
+
 
     @GET
     @Path("/meal/{cuisineType: .*}")
@@ -239,8 +204,7 @@ public class RestApp {
                     filterPath = "filter.php?a=Non_Alcoholic";
                     break;
                 default:
-                    // LA faut mettre une erreur 500
-                    return Response.status(Response.Status.BAD_REQUEST)
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                             .entity("<error>Le paramètre 'alcoholic' est invalide ou vide.</error>")
                             .build();
             }
@@ -334,11 +298,25 @@ public class RestApp {
 
     private SyntheticIngredients extractSyntheticIngredients(JsonObject drinkJson) {
         List<String> syntheticList = new ArrayList<>();
-        if (drinkJson.containsKey("strTags") && drinkJson.get("strTags") != JsonValue.NULL) {
-            syntheticList = Arrays.asList(drinkJson.getString("strTags").split(","));
+
+        for (int i = 1; i <= 15; i++) {
+            String ingredientKey = "strIngredient" + i;
+
+            if (drinkJson.containsKey(ingredientKey) && drinkJson.get(ingredientKey) != JsonValue.NULL) {
+                String ingredient = drinkJson.getString(ingredientKey).trim();
+                if (!ingredient.isEmpty()) {
+                    syntheticList.add(ingredient);
+                }
+            }
         }
+        if (syntheticList.isEmpty()) {
+            syntheticList.add("Unknown");
+        }
+
         return new SyntheticIngredients(syntheticList);
     }
+
+
 
     private IngredientDetails extractIngredients(JsonObject drinkJson) {
         List<IngredientDrink> ingredients = new ArrayList<>();
@@ -356,6 +334,34 @@ public class RestApp {
         }
         return new IngredientDetails(ingredients);
     }
+
+    /**
+     * Récupère une valeur String d'un JsonObject de manière sécurisée.
+     */
+    private static String getSafeJsonString(JsonObject jsonObject, String key) {
+        if (jsonObject.containsKey(key) && jsonObject.get(key).getValueType() == JsonValue.ValueType.STRING) {
+            return jsonObject.getString(key);
+        }
+        return ""; // Valeur par défaut si la clé est absente ou non string
+    }
+
+    /**
+     * Récupère une liste de String à partir d'un JsonArray, en s'assurant qu'il ne cause pas d'erreur.
+     */
+    private static List<String> extractJsonArrayAsList(JsonObject jsonObject, String key) {
+        List<String> resultList = new ArrayList<>();
+        if (jsonObject.containsKey(key) && jsonObject.get(key).getValueType() == JsonValue.ValueType.ARRAY) {
+            JsonArray jsonArray = jsonObject.getJsonArray(key);
+            for (JsonValue value : jsonArray) {
+                if (value.getValueType() == JsonValue.ValueType.STRING) {
+                    resultList.add(value.toString().replace("\"", ""));
+                }
+            }
+        }
+        return resultList;
+    }
+
+
 
 
 }

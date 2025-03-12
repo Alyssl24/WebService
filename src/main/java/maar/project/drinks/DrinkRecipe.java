@@ -3,6 +3,7 @@ package maar.project.drinks;
 import jakarta.xml.bind.annotation.*;
 
 @XmlRootElement(name = "drink_recipe", namespace = "http://www.mysite.com/drinks/v1")
+@XmlType(namespace = "http://www.mysite.com/drinks/v1")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DrinkRecipe {
 

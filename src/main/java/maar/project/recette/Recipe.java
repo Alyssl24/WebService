@@ -48,80 +48,16 @@ public class Recipe {
         this.imageRecette = imageRecette;
         this.urlOrigine = urlOrigine;
         this.ingredients = ingredients;
-        this.allergenes = allergenes;
+        this.allergenes = allergenes; // ✅ Assignation des allergènes
         this.calories = calories;
     }
 
     // Getters & Setters
-    public String getRecipeId() {
-        return RecipeId;
-    }
-
-    public void setRecipeId(String idRecette) {
-        this.RecipeId = idRecette;
-    }
-
-    public String getNomPlat() {
-        return nomPlat;
-    }
-
-    public void setNomPlat(String nomPlat) {
-        this.nomPlat = nomPlat;
-    }
-
-    public RecipeDetails getTypeDetails() {
-        return typeDetails;
-    }
-
-    public void setTypeDetails(RecipeDetails typeDetails) {
-        this.typeDetails = typeDetails;
-    }
-
-    public String getTempsPreparation() {
-        return tempsPreparation;
-    }
-
-    public void setTempsPreparation(String tempsPreparation) {
-        this.tempsPreparation = tempsPreparation;
-    }
-
-    public String getImageRecette() {
-        return imageRecette;
-    }
-
-    public void setImageRecette(String imageRecette) {
-        this.imageRecette = imageRecette;
-    }
-
-    public String getUrlOrigine() {
-        return urlOrigine;
-    }
-
-    public void setUrlOrigine(String urlOrigine) {
-        this.urlOrigine = urlOrigine;
-    }
-
-    public BigDecimal getCalories() {
-        return calories;
-    }
-
-    public void setCalories(BigDecimal calories) {
-        this.calories = calories;
-    }
-
     public String getAllergenes() {
         return allergenes;
     }
 
     public void setAllergenes(String allergenes) {
         this.allergenes = allergenes;
-    }
-
-    public List<Ingredient> getIngredients() {
-        return ingredients;
-    }
-
-    public void setIngredients(List<Ingredient> ingredients) {
-        this.ingredients = ingredients;
     }
 }
