@@ -103,8 +103,8 @@
     <!-- Définition du type Recipe -->
     <xsd:complexType name="Recipe">
         <xsd:sequence>
-            <xsd:element name="recipe_name" type="Name"/>
-            <xsd:element name="recipe_details" type="Recipe_Details"/>
+            <xsd:element name="name_recipe" type="Name"/>
+            <xsd:element name="type_details" type="Recipe_Details"/>
             <xsd:element name="preparation_time" type="Time"/>
             <xsd:element name="recipe_image" type="Image"/>
             <xsd:element name="source_url" type="URL"/>
