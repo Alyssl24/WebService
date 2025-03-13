@@ -51,7 +51,6 @@
 
     <xsd:simpleType name="Allergens">
         <xsd:restriction base="xsd:string">
-            <xsd:minLength value="1"/>
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -66,6 +65,27 @@
     <xsd:simpleType name="Quantity">
         <xsd:restriction base="xsd:string"/>
     </xsd:simpleType>
+
+    <!-- Définition du type complexe pour meal_types -->
+    <xsd:complexType name="Meal_Types">
+        <xsd:sequence>
+            <xsd:element name="meal_type" type="Meal_Type" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Définition du type complexe pour dish_types -->
+    <xsd:complexType name="Dish_Types">
+        <xsd:sequence>
+            <xsd:element name="dish_type" type="Dish_Type" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Définition du type complex pour Cuisine_Types -->
+    <xsd:complexType name="Cuisine_Types">
+        <xsd:sequence>
+            <xsd:element name="kitchen_type" type="Kitchen_Type" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
 
     <!-- Définition du type Ingredient -->
     <xsd:complexType name="Ingredient_Type">
@@ -84,18 +104,11 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <!-- Définition du type Cuisine_Types -->
-    <xsd:complexType name="Cuisine_Types">
-        <xsd:sequence>
-            <xsd:element name="kitchen_type" type="Kitchen_Type" maxOccurs="unbounded"/>
-        </xsd:sequence>
-    </xsd:complexType>
-
     <!-- Définition du type Recipe_Details -->
     <xsd:complexType name="Recipe_Details">
         <xsd:sequence>
-            <xsd:element name="meal_type" type="Meal_Type" maxOccurs="unbounded"/>
-            <xsd:element name="dish_types" type="Dish_Type" maxOccurs="unbounded"/>
+            <xsd:element name="meal_types" type="Meal_Types"/>
+            <xsd:element name="dish_types" type="Dish_Types"/>
             <xsd:element name="cuisine_types" type="Cuisine_Types"/>
         </xsd:sequence>
     </xsd:complexType>
@@ -105,7 +118,7 @@
         <xsd:sequence>
             <xsd:element name="name_recipe" type="Name"/>
             <xsd:element name="type_details" type="Recipe_Details"/>
-            <xsd:element name="preparation_time" type="Time"/>
+            <xsd:element name="preparation_time" type="xsd:string"/>
             <xsd:element name="recipe_image" type="Image"/>
             <xsd:element name="source_url" type="URL"/>
             <xsd:element name="calories" type="Calories"/>
@@ -118,6 +131,8 @@
     <!-- Définition des éléments principaux -->
     <xsd:element name="ingredient" type="Ingredient_Type"/>
     <xsd:element name="ingredients" type="Ingredients_Type"/>
+    <xsd:element name="meal_types" type="Meal_Types"/>
+    <xsd:element name="dish_types" type="Dish_Types"/>
     <xsd:element name="cuisine_types" type="Cuisine_Types"/>
     <xsd:element name="recipe_details" type="Recipe_Details"/>
     <xsd:element name="recipe" type="Recipe"/>

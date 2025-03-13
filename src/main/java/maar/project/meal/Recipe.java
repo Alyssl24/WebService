@@ -1,4 +1,4 @@
-package maar.project.recette;
+package maar.project.meal;
 
 import jakarta.xml.bind.annotation.*;
 import java.math.BigDecimal;
@@ -9,7 +9,7 @@ import java.util.List;
 public class Recipe {
 
     @XmlAttribute(name = "recipe_id", required = true)
-    private String RecipeId;
+    private String recipeId;
 
     @XmlElement(name = "name_recipe")
     private String nomPlat;
@@ -17,19 +17,19 @@ public class Recipe {
     @XmlElement(name = "type_details")
     private RecipeDetails typeDetails;
 
-    @XmlElement(name = "temps_preparation")
-    private String tempsPreparation;
+    @XmlElement(name = "preparation_time")
+    private String preparationTime;
 
-    @XmlElement(name = "image_recette")
+    @XmlElement(name = "recipe_image")
     private String imageRecette;
 
-    @XmlElement(name = "url_origine")
+    @XmlElement(name = "source_url")
     private String urlOrigine;
 
     @XmlElement(name = "calories")
     private BigDecimal calories;
 
-    @XmlElement(name = "allergenes")
+    @XmlElement(name = "allergens")
     private String allergenes;
 
     @XmlElementWrapper(name = "ingredients")
@@ -38,26 +38,26 @@ public class Recipe {
 
     public Recipe() {}
 
-    public Recipe(String RecipeId, String nomPlat, RecipeDetails typeDetails,
-                  String tempsPreparation, String imageRecette, String urlOrigine,
+    public Recipe(String recipeId, String nomPlat, RecipeDetails typeDetails,
+                  String preparationTime, String imageRecette, String urlOrigine,
                   List<Ingredient> ingredients, String allergenes, BigDecimal calories) {
-        this.RecipeId = RecipeId;
+        this.recipeId = recipeId;
         this.nomPlat = nomPlat;
         this.typeDetails = typeDetails;
-        this.tempsPreparation = tempsPreparation;
+        this.preparationTime = preparationTime;
         this.imageRecette = imageRecette;
         this.urlOrigine = urlOrigine;
         this.ingredients = ingredients;
-        this.allergenes = allergenes; // ✅ Assignation des allergènes
+        this.allergenes = allergenes;
         this.calories = calories;
     }
 
     // Getters & Setters
-    public String getAllergenes() {
-        return allergenes;
+    public String getPreparationTime() {
+        return preparationTime;
     }
 
-    public void setAllergenes(String allergenes) {
-        this.allergenes = allergenes;
+    public void setPreparationTime(String preparationTime) {
+        this.preparationTime = preparationTime;
     }
 }
