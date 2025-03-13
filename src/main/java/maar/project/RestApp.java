@@ -32,7 +32,6 @@ public class RestApp {
 
     private final Client client = ClientBuilder.newClient();
 
-    // Instance statique de Random pour obtenir des index aléatoires
     private static final Random RANDOM = new Random();
 
     public static Recipe convertJsonToRecette(String jsonResponse) {
@@ -45,11 +44,11 @@ public class RestApp {
                 return null; // Aucune recette trouvée
             }
 
-            // Sélection aléatoire d'une recette parmi les hits
+            // Sélection random d'une recette parmi les hits
             int randomIndex = RANDOM.nextInt(hits.size());
             JsonObject recipeJson = hits.getJsonObject(randomIndex).getJsonObject("recipe");
 
-            // Récupération des informations principales avec gestion des erreurs
+            // Récupération des informations principales
             String uri = getSafeJsonString(recipeJson, "uri");
             String label = getSafeJsonString(recipeJson, "label");
             String image = getSafeJsonString(recipeJson, "image");
@@ -79,12 +78,16 @@ public class RestApp {
             DishTypes typesPlat = new DishTypes(extractJsonArrayAsList(recipeJson, "dishType"));
             List<String> typesCuisine = extractJsonArrayAsList(recipeJson, "cuisineType");
 
-            // Conversion du temps total (en minutes) en format ISO 8601 (PTxxHxxMxxS)
+            // Conversion du temps total en format ISO 8601
             String timeFormatted = "PT30M"; // Valeur par défaut
             if (recipeJson.containsKey("totalTime") && recipeJson.get("totalTime").getValueType() == JsonValue.ValueType.NUMBER) {
                 int totalMinutes = recipeJson.getJsonNumber("totalTime").intValue();
                 timeFormatted = Duration.ofMinutes(totalMinutes).toString();
             }
+
+            // Récupération des allergènes à partir de `healthLabels`
+            List<String> healthLabels = extractJsonArrayAsList(recipeJson, "healthLabels");
+            String allergenes = String.join(", ", healthLabels); // Convertir la liste en une seule chaîne
 
             // Création de l'objet TypeDetails
             RecipeDetails typeDetails = new RecipeDetails(typesRepas, typesPlat, typesCuisine);
@@ -98,7 +101,7 @@ public class RestApp {
                     image,
                     url,
                     ingredients,
-                    "", // allergènes sous forme de chaîne vide
+                    allergenes, // Ajout des allergènes
                     BigDecimal.valueOf(recipeJson.containsKey("calories")
                             ? recipeJson.getJsonNumber("calories").doubleValue()
                             : 0.0) // Valeur par défaut
@@ -109,6 +112,7 @@ public class RestApp {
         }
         return recette;
     }
+
 
     @GET
     @Path("/meal/{cuisineType: .*}")
