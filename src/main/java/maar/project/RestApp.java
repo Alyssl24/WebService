@@ -115,7 +115,7 @@ public class RestApp {
 
 
     @GET
-    @Path("/meal/{cuisineType: .*}")
+    @Path("/meal/{cuisineType}")
     @Produces(MediaType.APPLICATION_XML)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
         if (cuisineType == null || cuisineType.trim().isEmpty()) {
