@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 @Path("/recipe")
 public class RestApp {
@@ -113,71 +114,81 @@ public class RestApp {
         return recette;
     }
 
-
     @GET
     @Path("/meal/{cuisineType: .*}")
     @Produces(MediaType.APPLICATION_XML)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
+        // Vérif 400 : vide
         if (cuisineType == null || cuisineType.trim().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Le paramètre 'cuisineType' est invalide ou vide.")
                     .build();
         }
 
-        // Construction de l'URL pour appeler l'API
+        // Construit l'URL
         String fullUrl = API_URL + "?type=public&app_id=" + APP_ID + "&app_key=" + APP_KEY + "&cuisineType=" + cuisineType;
-        Response apiResponse;
-        try {
-            apiResponse = client.target(fullUrl)
-                    .request(MediaType.APPLICATION_JSON)
-                    .get();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erreur lors de l'appel à l'API externe: " + e.getMessage())
-                    .build();
-        }
 
-        if (apiResponse.getStatus() != 200) {
-            String errorMessage = apiResponse.readEntity(String.class);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erreur API externe (HTTP " + apiResponse.getStatus() + "): " + errorMessage)
-                    .build();
-        }
+        return processRecipeResponse(fullUrl, (apiResponse) -> {
+            int status = apiResponse.getStatus();
 
-        String jsonResponse = apiResponse.readEntity(String.class);
-
-        // Vérification rapide que l'API a retourné au moins une recette
-        try (JsonReader jr = Json.createReader(new StringReader(jsonResponse))) {
-            JsonObject rootJson = jr.readObject();
-            JsonArray hits = rootJson.getJsonArray("hits");
-            if (hits == null || hits.isEmpty()) {
+            if (status != 200) {
+                String errorMessage = apiResponse.readEntity(String.class);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .entity("Erreur API externe : aucune recette trouvée pour le cuisineType : " + cuisineType)
+                        .entity("Erreur API externe (HTTP " + status + ") : " + errorMessage)
                         .build();
             }
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erreur lors du traitement du JSON retourné par l'API externe: " + e.getMessage())
-                    .build();
-        }
 
-        Recipe recette = convertJsonToRecette(jsonResponse);
+            String jsonResponse = apiResponse.readEntity(String.class);
+            JsonObject rootJson;
+            try (JsonReader reader = Json.createReader(new StringReader(jsonResponse))) {
+                rootJson = reader.readObject();
+            } catch (Exception e) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Erreur de lecture JSON : " + e.getMessage())
+                        .build();
+            }
 
-        // Génération du XML à partir de l'objet Recette
-        StringWriter xmlWriter = new StringWriter();
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Recipe.class);
-            Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshaller.marshal(recette, xmlWriter);
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erreur lors de la génération du XML: " + e.getMessage())
-                    .build();
-        }
-        return Response.ok(xmlWriter.toString()).build();
+            // Vérif 400 : cuisineType pas reconnu (aucun hit)
+            JsonArray hits = rootJson.getJsonArray("hits");
+            if (hits == null || hits.isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Aucune recette trouvée pour le type de cuisine : " + cuisineType)
+                        .build();
+            }
+
+            // Parse recette aléatoire
+            Recipe recette = convertJsonToRecette(jsonResponse);
+
+            // Convertit en XML
+            try {
+                JAXBContext jaxbContext = JAXBContext.newInstance(Recipe.class);
+                StringWriter xmlWriter = new StringWriter();
+                Marshaller marshaller = jaxbContext.createMarshaller();
+                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+                marshaller.marshal(recette, xmlWriter);
+                return Response.ok(xmlWriter.toString()).build();
+            } catch (Exception e) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Erreur lors de la génération du XML : " + e.getMessage())
+                        .build();
+            }
+        });
     }
 
+    private Response processRecipeResponse(String url, Function<Response, Response> parser) {
+        try {
+            Response apiResponse = client.target(url)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get();
+
+            return parser.apply(apiResponse);
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erreur interne lors de l'appel à l'API : " + e.getMessage())
+                    .build();
+        }
+    }
 
     // API BOISSONS PART
     private static final String API_URL_DRINK = "https://www.thecocktaildb.com/api/json/v1/1/";
@@ -186,7 +197,6 @@ public class RestApp {
     @Path("/drink")
     @Produces(MediaType.APPLICATION_XML)
     public Response getDrink(@QueryParam("alcoholic") String alcoholic) {
-        Response apiResponse;
         String filterPath;
 
         if (alcoholic == null) {
@@ -203,28 +213,30 @@ public class RestApp {
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                             .entity("<error>Le paramètre 'alcoholic' est invalide ou vide.</error>")
                             .build();
+
             }
         }
 
         String fullUrl = API_URL_DRINK + filterPath;
+        Response apiResponse;
         try {
             apiResponse = client.target(fullUrl)
                     .request(MediaType.APPLICATION_JSON)
                     .get();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("<error>Erreur lors de l'appel à l'API externe: " + e.getMessage() + "</error>")
+                    .entity("<error>Erreur appel API : " + e.getMessage() + "</error>")
                     .build();
         }
 
-        String jsonResponse = apiResponse.readEntity(String.class);
-
         if (alcoholic == null) {
-            return Response.ok(convertJsonToXml(jsonResponse)).build();
+            String result = processApiResponse(apiResponse, (resp) -> convertJsonToXml(resp.readEntity(String.class)));
+            return Response.ok(result).build();
         }
 
-        try (JsonReader jsonReader = Json.createReader(new StringReader(jsonResponse))) {
-            JsonObject rootJson = jsonReader.readObject();
+        // Sinon on va chercher les détails d'une boisson
+        return processApiResponse(apiResponse, (resp) -> {
+            JsonObject rootJson = resp.readEntity(JsonObject.class);
             JsonArray drinksArray = rootJson.getJsonArray("drinks");
 
             if (drinksArray == null || drinksArray.isEmpty()) {
@@ -233,24 +245,18 @@ public class RestApp {
                         .build();
             }
 
-            Random random = new Random();
-            int randomIndex = random.nextInt(drinksArray.size());
-            JsonObject selectedDrink = drinksArray.getJsonObject(randomIndex);
-            String drinkId = selectedDrink.getString("idDrink");
+            int randomIndex = RANDOM.nextInt(drinksArray.size());
+            String drinkId = drinksArray.getJsonObject(randomIndex).getString("idDrink");
 
-            String detailsUrl = API_URL_DRINK + "lookup.php?i=" + drinkId;
-            Response detailsResponse = client.target(detailsUrl)
+            Response detailsResponse = client.target(API_URL_DRINK + "lookup.php?i=" + drinkId)
                     .request(MediaType.APPLICATION_JSON)
                     .get();
 
-            return Response.ok(convertJsonToXml(detailsResponse.readEntity(String.class))).build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("<error>Erreur lors du traitement des données JSON: " + e.getMessage() + "</error>")
-                    .build();
-        }
+            String xml = convertJsonToXml(detailsResponse.readEntity(String.class));
+            return Response.ok(xml).build();
+        });
     }
+
 
     private String convertJsonToXml(String jsonResponse) {
         try {
@@ -312,8 +318,6 @@ public class RestApp {
         return new SyntheticIngredients(syntheticList);
     }
 
-
-
     private IngredientDetails extractIngredients(JsonObject drinkJson) {
         List<IngredientDrink> ingredients = new ArrayList<>();
         for (int i = 1; i <= 15; i++) {  // Les ingrédients sont numérotés de 1 à 15
@@ -357,6 +361,15 @@ public class RestApp {
         return resultList;
     }
 
+
+    private <T> T processApiResponse(Response response, Function<Response, T> parser) {
+        try {
+            return parser.apply(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 
 
