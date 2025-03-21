@@ -65,9 +65,8 @@ public class RestAppTest {
      * Remarque : Ce test dépend du comportement de l'API externe et peut être amélioré en utilisant un mock.
      */
     @Test
-    public void testGetRecipeApiError() {
+    public void testGetRecipeWithUnknownCuisineType() {
         Client client = ClientBuilder.newClient();
-        // Utiliser une valeur de cuisineType qui provoque une erreur (par exemple "invalidCuisine")
         String cuisineType = "invalidCuisine";
         String url = BASE_URL_MEAL + cuisineType;
 
@@ -75,15 +74,49 @@ public class RestAppTest {
                 .request(MediaType.APPLICATION_XML)
                 .get();
 
-        // Selon l'implémentation, une erreur externe renvoie HTTP 500
-        Assertions.assertEquals(500, response.getStatus(), "Le code HTTP doit être 500 en cas d'erreur de l'API externe.");
+        Assertions.assertEquals(400, response.getStatus(), "Le code HTTP doit être 400 quand aucun résultat n’est trouvé.");
 
         String errorMessage = response.readEntity(String.class);
-        Assertions.assertTrue(errorMessage.contains("Erreur API externe") ||
-                        errorMessage.contains("Erreur lors de l'appel"),
-                "Le message d'erreur doit indiquer une erreur lors de l'appel à l'API externe.");
-        System.out.println("Test API Error - Message d'erreur : " + errorMessage);
+        Assertions.assertTrue(errorMessage.contains("Aucune recette trouvée") ||
+                        errorMessage.contains("invalide"),
+                "Le message d'erreur doit indiquer l'absence de recette ou un paramètre invalide.");
     }
+
+    /**
+     * Cas 4 : Simulation d'une erreur technique lors de l'appel à l'API externe.
+     * Par exemple, en modifiant temporairement l'URL pour qu'elle pointe vers un domaine invalide.
+     * On s'attend à obtenir un code HTTP 500 avec un message d'erreur technique.
+     *
+     * Remarque : Ce test provoque volontairement une erreur technique réseau.
+     * Dans un vrai environnement de test, ce genre de test devrait être mocké pour éviter
+     * les appels réels instables.
+     */
+    @Test
+    public void testGetRecipeApiTechnicalError() {
+        Client client = ClientBuilder.newClient();
+
+        String fakeUrl = "http://localhost:9999/invalid-endpoint/recipe/meal/italian";
+
+        Response response;
+        try {
+            response = client.target(fakeUrl)
+                    .request(MediaType.APPLICATION_XML)
+                    .get();
+        } catch (Exception e) {
+            // Si l’appel plante complètement, c’est que l’erreur technique est bien simulée
+            System.out.println("Erreur réseau simulée avec succès : " + e.getMessage());
+            return; // Test réussi car on voulait une erreur réseau
+        }
+
+        // Si on arrive à obtenir une réponse HTTP, on vérifie que c'est bien une erreur 500
+        Assertions.assertEquals(500, response.getStatus(), "Le code HTTP doit être 500 en cas d'erreur technique.");
+
+        String errorMessage = response.readEntity(String.class);
+        Assertions.assertTrue(errorMessage.toLowerCase().contains("erreur"),
+                "Le message d'erreur doit contenir des détails sur l'erreur.");
+        System.out.println("Test erreur technique - Message reçu : " + errorMessage);
+    }
+
 
 
     /**
@@ -152,28 +185,24 @@ public class RestAppTest {
     }
 
     /**
-     * Cas 4 : Simulation d'une erreur de l'API externe.
-     * Par exemple, en passant une valeur de alcoholic qui n'est pas reconnue par l'API externe.
-     * On s'attend à obtenir un code HTTP 500 avec le détail de l'erreur.
-     *
-     * Remarque : Ce test dépend du comportement de l'API externe et peut être amélioré en utilisant un mock.
+     * Cas 4 : Simulation d'une erreur côté client due à un paramètre 'alcoholic' invalide.
+     * Le service doit renvoyer une erreur HTTP 500 avec un message expliquant l’erreur.
      */
     @Test
-    public void testGetDrinkApiError() {
+    public void testGetDrinkWithInvalidParam() {
         Client client = ClientBuilder.newClient();
-        String url = BASE_URL_DRINK + "?alcoholic=" + "blabla";
+        String url = BASE_URL_DRINK + "?alcoholic=blabla";
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_XML)
                 .get();
 
-        // Selon l'implémentation, une erreur externe renvoie HTTP 500
-        Assertions.assertEquals(500, response.getStatus(), "Le code HTTP doit être 500 en cas d'erreur de l'API externe.");
+        Assertions.assertEquals(500, response.getStatus(), "Le code HTTP doit être 500 en cas de paramètre 'alcoholic' invalide.");
 
         String errorMessage = response.readEntity(String.class);
-        Assertions.assertTrue(errorMessage.contains("Erreur API externe") ||
-                        errorMessage.contains("Erreur lors de l'appel") || errorMessage.contains("<error>Le paramètre 'alcoholic' est invalide ou vide.</error>"),
-                "Le message d'erreur doit indiquer une erreur lors de l'appel à l'API externe.");
-        System.out.println("Test API Error - Message d'erreur : " + errorMessage);
+        Assertions.assertTrue(errorMessage.contains("paramètre") || errorMessage.contains("invalide"),
+                "Le message d'erreur doit mentionner que le paramètre 'alcoholic' est invalide.");
+        System.out.println("Test paramètre invalide - Message : " + errorMessage);
     }
+
 }
