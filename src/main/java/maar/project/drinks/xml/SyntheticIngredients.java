@@ -1,4 +1,4 @@
-package maar.project.drinks;
+package maar.project.drinks.xml;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

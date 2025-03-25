@@ -1,5 +1,6 @@
-package maar.project.meal;
+package maar.project.meal.xml;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.xml.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,18 +12,22 @@ public class Recipe {
     @XmlAttribute(name = "recipe_id", required = true)
     private String recipeId;
 
+    @JsonbProperty("name")
     @XmlElement(name = "name_recipe")
     private String nomPlat;
 
     @XmlElement(name = "type_details")
     private RecipeDetails typeDetails;
 
+    @JsonbProperty("preparationTime")
     @XmlElement(name = "preparation_time")
     private String preparationTime;
 
+    @JsonbProperty("imageURL")
     @XmlElement(name = "recipe_image")
     private String imageRecette;
 
+    @JsonbProperty("source")
     @XmlElement(name = "source_url")
     private String urlOrigine;
 

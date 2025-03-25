@@ -12,8 +12,8 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
-import maar.project.drinks.*;
-import maar.project.meal.*;
+import maar.project.drinks.xml.*;
+import maar.project.meal.xml.*;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -25,14 +25,8 @@ import java.util.Random;
 import java.util.function.Function;
 
 @Path("/recipe")
-public class RestApp {
-
-    private static final String API_URL = "https://api.edamam.com/api/recipes/v2";
-    private static final String APP_ID = "c63c1b50";
-    private static final String APP_KEY = "9435486d5c699d9ea4b5d3f86ff0a035";
-
+public class RestAppXml extends ApiConfig {
     private final Client client = ClientBuilder.newClient();
-
     private static final Random RANDOM = new Random();
 
     public static Recipe convertJsonToRecette(String jsonResponse) {

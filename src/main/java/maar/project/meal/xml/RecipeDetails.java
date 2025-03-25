@@ -1,5 +1,6 @@
-package maar.project.meal;
+package maar.project.meal.xml;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.xml.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class RecipeDetails {
     @XmlElement(name = "dish_types")
     private DishTypes dishTypes; // Utilisation de la classe DishTypes
 
+    @JsonbProperty("country")
     @XmlElementWrapper(name = "cuisine_types")
     @XmlElement(name = "kitchen_type")
     private List<String> cuisineTypes;

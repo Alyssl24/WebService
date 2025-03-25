@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Meal schema",
+  "description": "JSON Schema for a Meal",
+  "type": "object",
+  "required": [
+    "success"
+  ],
+  "if": {
+    "properties": {
+      "success": {
+        "const": true
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "name",
+      "type",
+      "country",
+      "preparationTime",
+      "source",
+      "ingredients",
+      "detailedIngredients",
+      "instructions"
+    ]
+  },
+  "else": {
+    "required": [
+      "api_failed",
+      "api_status"
+    ]
+  },
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "title": "The success schema",
+      "description": "true si le payload est une réponse valide.",
+      "default": true,
+      "examples": [
+        true
+      ]
+    },
+    "api_failed": {
+      "type": "string",
+      "title": "The api_failed schema",
+      "description": "Nom de l'API REST qui a échoué.",
+      "default": "",
+      "examples": [
+        "Flickr"
+      ]
+    },
+    "api_status": {
+      "type": "string",
+      "title": "The api_status schema",
+      "description": "Code de retour HTTP de l'API REST qui a échoué.",
+      "default": "",
+      "examples": [
+        "404"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "description": "The meal name"
+    },
+    "type": {
+      "type": "string",
+      "description": "The meal type (example : main course)"
+    },
+    "country": {
+      "type": "string",
+      "description": "The cooking type of the recipe (nationality ; example : japanese)"
+    },
+    "preparationTime": {
+      "type": "string",
+      "description": "The recipe preparation time"
+    },
+    "imageURL": {
+      "type": "string",
+      "description": "An URL of an image that illustrates the recipe"
+    },
+    "source": {
+      "type": "string",
+      "description": "The recipe source URL"
+    },
+    "ingredients": {
+      "type": "string",
+      "description": "The list of ingredients separated by a comma without any measure"
+    },
+    "detailedIngredients": {
+      "type": "array",
+      "description": "The detailed list of ingredients",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The ingredient name"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "The ingredient quantity"
+          },
+          "image": {
+            "type": "string",
+            "description": "An URL of an image that shows the ingredient"
+          }
+        },
+        "required": ["name", "quantity"],
+        "additionalProperties": false
+      }
+    },
+    "instructions": {
+      "type": "array",
+      "description": "The instructions list",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
