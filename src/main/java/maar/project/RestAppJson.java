@@ -24,7 +24,7 @@ public class RestAppJson extends ApiConfig {
     private static final Random RANDOM = new Random();
 
     @GET
-    @Path("/meal/{cuisineType}")
+    @Path("/meal/{cuisineType:.*}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
         if (cuisineType == null || cuisineType.trim().isEmpty()) {
