@@ -1,45 +1,53 @@
 package maar.project;
 
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonStructure;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.leadpony.justify.api.JsonSchema;
+import org.leadpony.justify.api.JsonValidationService;
+import org.leadpony.justify.api.ProblemHandler;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RecetteJsonValidationTest {
 
     private final String BASE_URL = "http://localhost:8000/v2/recipe/meal/";
-    private final String SCHEMA_PATH = "src/main/resources/RecipeMeal.json"; // Ton JSON Schema
+    private final String SCHEMA_PATH = "src/main/resources/RecipeMeal.json";
 
     @Test
-    public void testJsonConformeAuSchema() throws Exception {
+    public void testJsonRespecteLeSchema() throws Exception {
         Client client = ClientBuilder.newClient();
         String cuisineType = "italian";
-        String url = BASE_URL + cuisineType;
-
-        Response response = client.target(url)
+        Response response = client.target(BASE_URL + cuisineType)
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        Assertions.assertEquals(200, response.getStatus());
+        assertEquals(200, response.getStatus());
 
         String jsonOutput = response.readEntity(String.class);
-        Assertions.assertNotNull(jsonOutput);
-        System.out.println("JSON généré :\n" + jsonOutput);
-/*
-        // Charger le schéma JSON
-        try (FileInputStream schemaStream = new FileInputStream(SCHEMA_PATH)) {
-            JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
-            Schema schema = SchemaLoader.load(rawSchema);
+        assertNotNull(jsonOutput);
 
-            // Valider la réponse JSON
-            schema.validate(new JSONObject(new JSONTokener(new StringReader(jsonOutput))));
-        } catch (Exception e) {
-            Assertions.fail("Le JSON généré n'est pas conforme au schéma : " + e.getMessage());
-        }*/
+        JsonValidationService service = JsonValidationService.newInstance();
+
+        JsonSchema schema;
+        try (java.io.Reader reader = Files.newBufferedReader(Paths.get(SCHEMA_PATH))) {
+            schema = service.createSchemaReader(reader).read();
+        }
+
+        ProblemHandler handler = service.createProblemPrinter(System.out::println);
+        try (JsonReader reader = service.createReader(new StringReader(jsonOutput), schema, handler)) {
+            JsonStructure validated = reader.read();
+            assertNotNull(validated);
+        }
     }
 }
