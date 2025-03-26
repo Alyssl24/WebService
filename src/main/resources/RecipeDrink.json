@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Drink schema",
+  "description": "JSON Schema for a Drink",
+  "type": "object",
+  "required": [
+    "success"
+  ],
+  "if": {
+    "properties": {
+      "success": {
+        "const": true
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "name",
+      "type",
+      "alcoholic",
+      "ingredients",
+      "detailedIngredients",
+      "instructions"
+    ]
+  },
+  "else": {
+    "required": [
+      "api_failed",
+      "api_status"
+    ]
+  },
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "title": "The success schema",
+      "description": "true si le payload est une réponse valide.",
+      "default": true,
+      "examples": [
+        true
+      ]
+    },
+    "api_failed": {
+      "type": "string",
+      "title": "The api_failed schema",
+      "description": "Nom de l'API REST qui a échoué.",
+      "default": "",
+      "examples": [
+        "Flickr"
+      ]
+    },
+    "api_status": {
+      "type": "string",
+      "title": "The api_status schema",
+      "description": "Code de retour HTTP de l'API REST qui a échoué.",
+      "default": "",
+      "examples": [
+        "404"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "description": "The drink name"
+    },
+    "type": {
+      "type": "string",
+      "description": "The drink type"
+    },
+    "alcoholic": {
+      "type": "boolean",
+      "description": "Does the drink contains alcohol or not"
+    },
+    "imageURL": {
+      "type": "string",
+      "description": "An URL of an image that illustrates the recipe"
+    },
+    "ingredients": {
+      "type": "array",
+      "description": "The list of ingredients",
+      "items": {
+        "type": "string"
+      }
+    },
+    "detailedIngredients": {
+      "type": "array",
+      "description": "The detailed list of ingredients",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The ingredient name"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "The ingredient quantity"
+          },
+          "image": {
+            "type": "string",
+            "description": "An URL of an image that shows the ingredient"
+          }
+        },
+        "required": ["name", "quantity"],
+        "additionalProperties": false
+      }
+    },
+    "instructions": {
+      "type": "string",
+      "description": "The instructions list in a single string data. All the different instructions are separated with a '\n' character"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,14 +1,13 @@
 package maar.project;
 
 import jakarta.json.*;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import maar.project.drinks.json.DrinkResponse;
+import maar.project.drinks.json.TheCocktailDBResponse;
 import maar.project.meal.json.DetailedIngredient;
 import maar.project.meal.json.RecipeResponse;
 
@@ -24,7 +23,7 @@ public class RestAppJson extends ApiConfig {
     private static final Random RANDOM = new Random();
 
     @GET
-    @Path("/meal/{cuisineType}")
+    @Path("/meal/{cuisineType: .*}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
         if (cuisineType == null || cuisineType.trim().isEmpty()) {
@@ -113,4 +112,104 @@ public class RestAppJson extends ApiConfig {
         }
         return "";
     }
+
+    @GET
+    @Path("/drink")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDrinkJson(@QueryParam("alcoholic") String alcoholic) {
+        String filterPath;
+
+        if (alcoholic == null) {
+            filterPath = "random.php";
+        } else {
+            switch (alcoholic) {
+                case "true":
+                    filterPath = "filter.php?a=Alcoholic";
+                    break;
+                case "false":
+                    filterPath = "filter.php?a=Non_Alcoholic";
+                    break;
+                default:
+                    return buildErrorResponse("400");
+            }
+        }
+
+        try {
+            Response rawResponse = client.target(API_URL_DRINK + filterPath)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get();
+
+            TheCocktailDBResponse raw = rawResponse.readEntity(TheCocktailDBResponse.class);
+            if (raw.getDrinks() == null || raw.getDrinks().isEmpty()) {
+                return buildErrorResponse("404");
+            }
+
+            TheCocktailDBResponse.Drink drink;
+            if (alcoholic == null) {
+                drink = raw.getDrinks().get(0);
+            } else {
+                int randIndex = RANDOM.nextInt(raw.getDrinks().size());
+                String idDrink = raw.getDrinks().get(randIndex).getIdDrink();
+
+                Response detailsResponse = client.target(API_URL_DRINK + "lookup.php?i=" + idDrink)
+                        .request(MediaType.APPLICATION_JSON)
+                        .get();
+
+                TheCocktailDBResponse details = detailsResponse.readEntity(TheCocktailDBResponse.class);
+                drink = details.getDrinks().get(0);
+            }
+
+            DrinkResponse formatted = convertToDrinkResponse(drink);
+            return Response.ok(formatted).build();
+
+        } catch (Exception e) {
+            return buildErrorResponse("500");
+        }
+    }
+
+    private Response buildErrorResponse(String code) {
+        DrinkResponse error = new DrinkResponse();
+        error.setSuccess(false);
+        error.setApi_failed("TheCocktailDB");
+        error.setApi_status(code);
+        return Response.status(Integer.parseInt(code)).entity(error).build();
+    }
+
+    public DrinkResponse convertToDrinkResponse(TheCocktailDBResponse.Drink rawDrink) {
+        DrinkResponse result = new DrinkResponse();
+        result.setSuccess(true);
+        result.setName(rawDrink.getStrDrink());
+        result.setType(rawDrink.getStrCategory());
+        result.setAlcoholic("Alcoholic".equals(rawDrink.getStrAlcoholic()));
+        result.setImageURL(rawDrink.getStrDrinkThumb());
+        result.setInstructions(rawDrink.getStrInstructions());
+
+        List<String> ingredients = new ArrayList<>();
+        List<DrinkResponse.DetailedIngredient> detailed = new ArrayList<>();
+
+        for (int i = 1; i <= 15; i++) {
+            try {
+                String ingredient = (String) rawDrink.getClass().getMethod("getStrIngredient" + i).invoke(rawDrink);
+                String measure = (String) rawDrink.getClass().getMethod("getStrMeasure" + i).invoke(rawDrink);
+
+                if (ingredient != null) {
+                    ingredients.add(ingredient);
+
+                    DrinkResponse.DetailedIngredient d = new DrinkResponse.DetailedIngredient();
+                    d.setName(ingredient);
+                    d.setQuantity(measure != null ? measure : "");
+                    d.setImage(""); // l'API ne donne pas d’image
+                    detailed.add(d);
+                }
+            } catch (Exception e) {
+                e.printStackTrace(); // facultatif
+            }
+        }
+
+        result.setIngredients(ingredients);
+        result.setDetailedIngredients(detailed);
+
+        return result;
+    }
+
 }

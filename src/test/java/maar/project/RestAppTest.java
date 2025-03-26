@@ -11,6 +11,8 @@ public class RestAppTest {
 
     private final String BASE_URL_MEAL = "http://localhost:8000/recipe/meal/";
     private final String BASE_URL_DRINK = "http://localhost:8000/recipe/drink";
+    private final String BASE_URL_DRINK_V2 = "http://localhost:8000/v2/recipe/drink";
+
 
     /**
      * Cas 1 : Paramètre cuisineType valide ("italian").
@@ -204,5 +206,93 @@ public class RestAppTest {
                 "Le message d'erreur doit mentionner que le paramètre 'alcoholic' est invalide.");
         System.out.println("Test paramètre invalide - Message : " + errorMessage);
     }
+
+    /** TEST JSON **/
+    /**
+     * Cas 1 JSON : Paramètre alcoholic = true.
+     * On s'attend à un JSON avec success=true et les champs requis.
+     */
+    @Test
+    public void testGetDrinkJsonAlcoholicSuccess() {
+        Client client = ClientBuilder.newClient();
+        boolean alcoholic = true;
+        String url = BASE_URL_DRINK_V2 + "?alcoholic=" + alcoholic;
+
+        Response response = client.target(url)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        Assertions.assertEquals(200, response.getStatus(), "Le code HTTP doit être 200 pour une requête JSON avec alcoholic=true.");
+
+        String json = response.readEntity(String.class);
+        Assertions.assertTrue(json.contains("\"success\":true"), "Le JSON doit contenir success=true.");
+        Assertions.assertTrue(json.contains("\"name\""), "Le JSON doit contenir le champ 'name'.");
+        Assertions.assertTrue(json.contains("\"alcoholic\":"), "Le JSON doit contenir le champ 'alcoholic'.");
+        System.out.println("Test JSON alcoolisé :\n" + json);
+    }
+
+    /**
+     * Cas 2 JSON : Paramètre alcoholic = false.
+     * Même logique que Cas 1.
+     */
+    @Test
+    public void testGetDrinkJsonNonAlcoholicSuccess() {
+        Client client = ClientBuilder.newClient();
+        boolean alcoholic = false;
+        String url = BASE_URL_DRINK_V2 + "?alcoholic=" + alcoholic;
+
+        Response response = client.target(url)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        Assertions.assertEquals(200, response.getStatus(), "Le code HTTP doit être 200 pour alcoholic=false.");
+
+        String json = response.readEntity(String.class);
+        Assertions.assertTrue(json.contains("\"success\":true"), "Le JSON doit indiquer success=true.");
+        Assertions.assertTrue(json.contains("\"ingredients\""), "Le JSON doit contenir une liste d'ingrédients.");
+        System.out.println("Test JSON non alcoolisé :\n" + json);
+    }
+
+    /**
+     * Cas 3 JSON : Sans paramètre alcoholic (aléatoire).
+     */
+    @Test
+    public void testGetDrinkJsonRandomSuccess() {
+        Client client = ClientBuilder.newClient();
+        String url = BASE_URL_DRINK_V2;
+
+        Response response = client.target(url)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        Assertions.assertEquals(200, response.getStatus(), "Le code HTTP doit être 200 pour une boisson aléatoire JSON.");
+
+        String json = response.readEntity(String.class);
+        Assertions.assertTrue(json.contains("\"success\":true"), "La réponse JSON doit indiquer success=true.");
+        Assertions.assertTrue(json.contains("\"detailedIngredients\""), "La réponse doit contenir detailedIngredients.");
+        System.out.println("Test JSON boisson aléatoire :\n" + json);
+    }
+
+    /**
+     * Cas 4 JSON : Paramètre alcoholic invalide → on veut success=false + api_failed/api_status.
+     */
+    @Test
+    public void testGetDrinkJsonInvalidParam() {
+        Client client = ClientBuilder.newClient();
+        String url = BASE_URL_DRINK_V2 + "?alcoholic=blabla";
+
+        Response response = client.target(url)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        Assertions.assertEquals(400, response.getStatus(), "Le code HTTP doit être 400 pour une valeur de paramètre invalide.");
+
+        String json = response.readEntity(String.class);
+        Assertions.assertTrue(json.contains("\"success\":false"), "La réponse JSON doit indiquer success=false.");
+        Assertions.assertTrue(json.contains("\"api_failed\""), "La réponse doit contenir api_failed.");
+        Assertions.assertTrue(json.contains("\"api_status\""), "La réponse doit contenir api_status.");
+        System.out.println("Test JSON paramètre invalide :\n" + json);
+    }
+
 
 }
