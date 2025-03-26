@@ -109,7 +109,7 @@ public class RestAppXml extends ApiConfig {
     }
 
     @GET
-    @Path("/meal/{cuisineType}")
+    @Path("/meal/{cuisineType: .*}")
     @Produces(MediaType.APPLICATION_XML)
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
         // Vérif 400 : vide
@@ -183,9 +183,6 @@ public class RestAppXml extends ApiConfig {
                     .build();
         }
     }
-
-    // API BOISSONS PART
-    private static final String API_URL_DRINK = "https://www.thecocktaildb.com/api/json/v1/1/";
 
     @GET
     @Path("/drink")
