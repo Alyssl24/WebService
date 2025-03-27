@@ -1,6 +1,5 @@
 package maar.project;
 
-import jakarta.json.Json;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonStructure;
 import jakarta.ws.rs.client.Client;
@@ -12,14 +11,13 @@ import org.leadpony.justify.api.JsonSchema;
 import org.leadpony.justify.api.JsonValidationService;
 import org.leadpony.justify.api.ProblemHandler;
 
-import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RecetteJsonValidationTest {
+public class RecipeJsonValidationTest {
 
     private final String BASE_URL = "http://localhost:8000/v2/recipe/meal/";
     private final String SCHEMA_PATH = "src/main/resources/RecipeMeal.json";

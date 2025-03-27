@@ -14,9 +14,8 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.StringReader;
-import java.io.StringWriter;
 
-public class RecetteXmlValidationTest {
+public class RecipeXmlValidationTest {
 
     private final String BASE_URL = "http://localhost:8000/recipe/meal/";
     private final String XSD_PATH = "src/main/resources/RecipeMeal.xsd"; // Chemin vers votre fichier XSD
