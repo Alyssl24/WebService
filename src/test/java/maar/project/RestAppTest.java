@@ -11,8 +11,8 @@ public class RestAppTest {
 
     private final String BASE_URL_MEAL_XML = "http://localhost:8000/recipe/meal/";
     private final String BASE_URL_MEAL_JSON = "http://localhost:8000/v2/recipe/meal/";
-    private final String BASE_URL_DRINK = "http://localhost:8000/recipe/drink";
-    private final String BASE_URL_DRINK_V2 = "http://localhost:8000/v2/recipe/drink";
+    private final String BASE_URL_DRINK_XML = "http://localhost:8000/recipe/drink";
+    private final String BASE_URL_DRINK_JSON = "http://localhost:8000/v2/recipe/drink";
 
 
     /**
@@ -231,10 +231,10 @@ public class RestAppTest {
      * On s'attend à obtenir un code HTTP 200 et un XML non nul.
      */
     @Test
-    public void testGetDrinkAlcoholicSuccess() {
+    public void testGetDrinkXmlAlcoholicSuccess() {
         Client client = ClientBuilder.newClient();
         boolean alcoholic = true;
-        String url = BASE_URL_DRINK + "?alcoholic=" + alcoholic;
+        String url = BASE_URL_DRINK_XML + "?alcoholic=" + alcoholic;
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_XML)
@@ -253,10 +253,10 @@ public class RestAppTest {
      * On s'attend à obtenir un code HTTP 200 et un XML non nul.
      */
     @Test
-    public void testGetDrinkNoAlcoholicSuccess() {
+    public void testGetDrinkXmlNoAlcoholicSuccess() {
         Client client = ClientBuilder.newClient();
         boolean alcoholic = false;
-        String url = BASE_URL_DRINK + "?alcoholic=" + alcoholic;
+        String url = BASE_URL_DRINK_XML + "?alcoholic=" + alcoholic;
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_XML)
@@ -275,9 +275,9 @@ public class RestAppTest {
      * On s'attend à obtenir un code HTTP 200 et un XML non nul.
      */
     @Test
-    public void testGetDrinkSuccess() {
+    public void testGetDrinkXmlSuccess() {
         Client client = ClientBuilder.newClient();
-        String url = BASE_URL_DRINK;
+        String url = BASE_URL_DRINK_XML;
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_XML)
@@ -296,9 +296,9 @@ public class RestAppTest {
      * Le service doit renvoyer une erreur HTTP 500 avec un message expliquant l’erreur.
      */
     @Test
-    public void testGetDrinkWithInvalidParam() {
+    public void testGetDrinkXmlWithInvalidParam() {
         Client client = ClientBuilder.newClient();
-        String url = BASE_URL_DRINK + "?alcoholic=blabla";
+        String url = BASE_URL_DRINK_XML + "?alcoholic=blabla";
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_XML)
@@ -312,7 +312,6 @@ public class RestAppTest {
         System.out.println("Test paramètre invalide - Message : " + errorMessage);
     }
 
-    /** TEST JSON **/
     /**
      * Cas 1 JSON : Paramètre alcoholic = true.
      * On s'attend à un JSON avec success=true et les champs requis.
@@ -321,7 +320,7 @@ public class RestAppTest {
     public void testGetDrinkJsonAlcoholicSuccess() {
         Client client = ClientBuilder.newClient();
         boolean alcoholic = true;
-        String url = BASE_URL_DRINK_V2 + "?alcoholic=" + alcoholic;
+        String url = BASE_URL_DRINK_JSON + "?alcoholic=" + alcoholic;
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_JSON)
@@ -344,7 +343,7 @@ public class RestAppTest {
     public void testGetDrinkJsonNonAlcoholicSuccess() {
         Client client = ClientBuilder.newClient();
         boolean alcoholic = false;
-        String url = BASE_URL_DRINK_V2 + "?alcoholic=" + alcoholic;
+        String url = BASE_URL_DRINK_JSON + "?alcoholic=" + alcoholic;
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_JSON)
@@ -364,7 +363,7 @@ public class RestAppTest {
     @Test
     public void testGetDrinkJsonRandomSuccess() {
         Client client = ClientBuilder.newClient();
-        String url = BASE_URL_DRINK_V2;
+        String url = BASE_URL_DRINK_JSON;
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_JSON)
@@ -384,7 +383,7 @@ public class RestAppTest {
     @Test
     public void testGetDrinkJsonInvalidParam() {
         Client client = ClientBuilder.newClient();
-        String url = BASE_URL_DRINK_V2 + "?alcoholic=blabla";
+        String url = BASE_URL_DRINK_JSON + "?alcoholic=blabla";
 
         Response response = client.target(url)
                 .request(MediaType.APPLICATION_JSON)
