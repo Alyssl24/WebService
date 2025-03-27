@@ -1,5 +1,6 @@
-package maar.project.meal;
+package maar.project.meal.xml;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.xml.bind.annotation.*;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import java.util.List;
 @XmlRootElement(name = "meal_types")
 public class MealTypes {
 
+    @JsonbProperty("type")
     @XmlElement(name = "meal_type")
     private List<String> mealTypes;
 

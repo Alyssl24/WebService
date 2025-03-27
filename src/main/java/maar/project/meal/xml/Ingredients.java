@@ -1,4 +1,4 @@
-package maar.project.meal;
+package maar.project.meal.xml;
 
 import jakarta.xml.bind.annotation.*;
 import java.util.List;

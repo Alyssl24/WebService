@@ -1,4 +1,4 @@
-package maar.project.meal;
+package maar.project.meal.xml;
 
 import jakarta.xml.bind.annotation.*;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.List;
 @XmlType(name = "Dish_Types")
 @XmlRootElement(name = "dish_types")
 public class DishTypes {
+
 
     @XmlElement(name = "dish_type")
     private List<String> dishTypes;
