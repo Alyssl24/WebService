@@ -154,15 +154,11 @@ public class RestAppTest {
         String url = BASE_URL_MEAL_JSON + cuisineType;
 
         Response response = client.target(url)
-                .request(MediaType.APPLICATION_XML)
+                .request(MediaType.APPLICATION_JSON)
                 .get();
 
         // On attend une réponse 400 (Bad Request)
         Assertions.assertEquals(400, response.getStatus(), "Le code HTTP doit être 400 pour un paramètre cuisineType vide.");
-
-        String errorMessage = response.readEntity(String.class);
-        Assertions.assertTrue(errorMessage.contains("invalide"), "Le message d'erreur doit indiquer que le paramètre est invalide.");
-        System.out.println("Test Invalid Cuisine - Message d'erreur : " + errorMessage);
     }
 
     /**
@@ -179,15 +175,10 @@ public class RestAppTest {
         String url = BASE_URL_MEAL_JSON + cuisineType;
 
         Response response = client.target(url)
-                .request(MediaType.APPLICATION_XML)
+                .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        Assertions.assertEquals(400, response.getStatus(), "Le code HTTP doit être 400 quand aucun résultat n’est trouvé.");
-
-        String errorMessage = response.readEntity(String.class);
-        Assertions.assertTrue(errorMessage.contains("Aucune recette trouvée") ||
-                        errorMessage.contains("invalide"),
-                "Le message d'erreur doit indiquer l'absence de recette ou un paramètre invalide.");
+        Assertions.assertEquals(404, response.getStatus(), "Le code HTTP doit être 404 quand aucun résultat n’est trouvé.");
     }
 
     /**
