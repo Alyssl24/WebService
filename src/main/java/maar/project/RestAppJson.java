@@ -1,5 +1,11 @@
 package maar.project;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.servers.Server;
 import jakarta.json.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.client.Client;
@@ -18,6 +24,16 @@ import java.util.List;
 import java.util.Random;
 
 @Path("/v2/recipe")
+@OpenAPIDefinition(
+        info = @Info(
+                title = "API Recettes MAAR - JSON",
+                version = "2.1",
+                description = "Services REST JSON pour les plats et boissons"
+        ),
+        servers = {
+                @Server(url = "http://localhost:8000", description = "Serveur local")
+        }
+)
 public class RestAppJson extends ApiConfig {
     private final Client client = ClientBuilder.newClient();
     private static final Random RANDOM = new Random();
@@ -25,6 +41,20 @@ public class RestAppJson extends ApiConfig {
     @GET
     @Path("/meal/{cuisineType: .*}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Get a random recipe by cuisine type",
+            description = "Returns a JSON-formatted recipe that conforms to a JSON Schema. Uses the Edamam API.",
+            parameters = {
+                    @Parameter(name = "cuisineType", description = "Cuisine type (e.g., italian, french, chinese)", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Recipe found"),
+                    @ApiResponse(responseCode = "400", description = "Missing or invalid parameter"),
+                    @ApiResponse(responseCode = "404", description = "No recipe found"),
+                    @ApiResponse(responseCode = "502", description = "Communication error with Edamam API"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
         if (cuisineType == null || cuisineType.trim().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -116,6 +146,19 @@ public class RestAppJson extends ApiConfig {
     @GET
     @Path("/drink")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Get a random drink",
+            description = "Returns a drink depending on the 'alcoholic' parameter (true, false or null). Uses TheCocktailDB.",
+            parameters = {
+                    @Parameter(name = "alcoholic", description = "true = alcoholic, false = non-alcoholic, null = random")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Drink found"),
+                    @ApiResponse(responseCode = "400", description = "Invalid parameter"),
+                    @ApiResponse(responseCode = "404", description = "No drink found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
     public Response getDrinkJson(@QueryParam("alcoholic") String alcoholic) {
         String filterPath;
 
