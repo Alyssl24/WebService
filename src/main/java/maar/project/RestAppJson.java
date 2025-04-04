@@ -26,9 +26,9 @@ import java.util.Random;
 @Path("/v2/recipe")
 @OpenAPIDefinition(
         info = @Info(
-                title = "API Recettes MAAR - JSON",
+                title = "API Recettes MAAR - JSON & XML",
                 version = "2.1",
-                description = "Services REST JSON pour les plats et boissons"
+                description = "Services REST pour les plats et boissons"
         ),
         servers = {
                 @Server(url = "http://localhost:8000", description = "Serveur local")

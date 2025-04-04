@@ -1,5 +1,13 @@
 package maar.project;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.servers.Server;
+
+
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
@@ -111,6 +119,18 @@ public class RestAppXml extends ApiConfig {
     @GET
     @Path("/meal/{cuisineType: .*}")
     @Produces(MediaType.APPLICATION_XML)
+    @Operation(
+            summary = "Obtenir une recette XML aléatoire selon un type de cuisine",
+            description = "Retourne une recette formatée XML à partir du type de cuisine fourni. Utilise l’API Edamam.",
+            parameters = {
+                    @Parameter(name = "cuisineType", description = "Type de cuisine (ex: italian, french, chinese)", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Recette trouvée"),
+                    @ApiResponse(responseCode = "400", description = "Paramètre invalide ou aucune recette trouvée"),
+                    @ApiResponse(responseCode = "500", description = "Erreur interne ou avec l’API Edamam")
+            }
+    )
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
         // Vérif 400 : vide
         if (cuisineType == null || cuisineType.trim().isEmpty()) {
@@ -187,6 +207,18 @@ public class RestAppXml extends ApiConfig {
     @GET
     @Path("/drink")
     @Produces(MediaType.APPLICATION_XML)
+    @Operation(
+            summary = "Obtenir une boisson aléatoire (XML)",
+            description = "Retourne une boisson formatée XML selon le paramètre 'alcoholic'. Utilise TheCocktailDB.",
+            parameters = {
+                    @Parameter(name = "alcoholic", description = "true = alcoolisée, false = sans alcool, null = aléatoire")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Boisson trouvée"),
+                    @ApiResponse(responseCode = "400", description = "Paramètre invalide ou aucune boisson"),
+                    @ApiResponse(responseCode = "500", description = "Erreur interne ou avec l’API TheCocktailDB")
+            }
+    )
     public Response getDrink(@QueryParam("alcoholic") String alcoholic) {
         String filterPath;
 
