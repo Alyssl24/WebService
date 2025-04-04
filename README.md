@@ -7,6 +7,8 @@
 | Alyssia | Leclerc   | Alyssl24   |
 | Chedli  | Benjaafar | Chaydonart |
 
+---
+
 ## Instructions
 
 ### Repas:
@@ -26,3 +28,19 @@
 
 Pour faire des tests il vous suffit lancer le serveur avec le Main.java et lancer ensuite une requête de la sorte : 
 http://localhost:8000/recipe/meal/<cuisineType>
+
+
+---
+
+## Génération du fichier OpenAPI
+
+Pour générer le fichier OpenAPI (`openapi.json`), exécutez simplement la commande suivante dans le terminal :
+```bash
+mvn clean compile
+```
+
+Le fichier sera automatiquement généré dans le dossier suivant :
+```bash
+target/generatedtest/openapi.json
+```
+
