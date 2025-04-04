@@ -33,16 +33,6 @@ import java.util.Random;
 import java.util.function.Function;
 
 @Path("/recipe")
-@OpenAPIDefinition(
-        info = @Info(
-                title = "API Recettes MAAR - XML",
-                version = "2.1",
-                description = "Services REST XML pour les plats et boissons"
-        ),
-        servers = {
-                @Server(url = "http://localhost:8000", description = "Serveur local")
-        }
-)
 public class RestAppXml extends ApiConfig {
     private final Client client = ClientBuilder.newClient();
     private static final Random RANDOM = new Random();
