@@ -90,7 +90,6 @@ public class MenuJsonValidationTest {
                 reader.read();
                 fail("Le JSON aurait dû être invalide, mais il est passé.");
             } catch (Exception e) {
-                // OK : attendu
             }
         }
     }
