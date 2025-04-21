@@ -16,8 +16,14 @@ import maar.project.drinks.json.DrinkResponse;
 import maar.project.drinks.json.TheCocktailDBResponse;
 import maar.project.meal.json.DetailedIngredient;
 import maar.project.meal.json.RecipeResponse;
+import maar.project.menu.json.MenuRequest;
+import org.leadpony.justify.api.JsonSchema;
+import org.leadpony.justify.api.JsonValidationService;
+import org.leadpony.justify.api.ProblemHandler;
 
+import java.io.InputStream;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +43,52 @@ import java.util.Random;
 public class RestAppJson extends ApiConfig {
     private final Client client = ClientBuilder.newClient();
     private static final Random RANDOM = new Random();
+
+    @POST
+    @Path("/menu")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Génère un menu complet aléatoire",
+            description = " Retourne un menu JSON contenant une entrée, un plat, un dessert et une boisson, tous générés aléatoirement mais en respectant les filtres passés dans la requête. Les données proviennent de l’API Edamam (pour les plats) et TheCocktailDB (pour les boissons). ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Menu généré avec succès"),
+                    @ApiResponse(responseCode = "400", description = "Paramètres invalides ou aucun résultat trouvé"),
+                    @ApiResponse(responseCode = "500", description = "Erreur interne lors de la génération du menu")
+            }
+    )
+    public Response getMenu(String rawJson) {
+        try {
+            JsonValidationService service = JsonValidationService.newInstance();
+            InputStream schemaStream = getClass().getClassLoader().getResourceAsStream("Menu.json");
+            if (schemaStream == null) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Erreur : fichier Menu.json introuvable dans resources/").build();
+            }
+            JsonSchema schema = service.readSchema(schemaStream);
+
+            JsonReader reader = service.createReader(
+                    new StringReader(rawJson),
+                    schema,
+                    ProblemHandler.throwing()
+            );
+            JsonObject validated = reader.readObject();
+
+            jakarta.json.bind.Jsonb jsonb = jakarta.json.bind.JsonbBuilder.create();
+            MenuRequest request = jsonb.fromJson(rawJson, MenuRequest.class);
+
+            // faire les appels d'api ici
+            return Response.ok("MenuRequest reçu et validé ✅").build();
+
+        } catch (JsonException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Requête d'entré JSON invalide : " + e.getMessage()).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erreur serveur : " + e.getMessage()).build();
+        }
+    }
+
 
     @GET
     @Path("/meal/{cuisineType: .*}")

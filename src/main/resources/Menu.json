@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MenuRequest",
+  "type": "object",
+  "required": ["cuisineType"],
+  "properties": {
+    "cuisineType": {
+      "type": "string"
+    },
+    "alcohol": {
+      "type": "boolean"
+    },
+    "requiredIngredient": {
+      "type": "string"
+    },
+    "maxPreparationTime": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "vegetarian",
+          "vegan",
+          "gluten-free",
+          "pork-free",
+          "dairy-free"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}
