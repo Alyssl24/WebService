@@ -17,7 +17,6 @@ import maar.project.drinks.json.TheCocktailDBResponse;
 import maar.project.meal.json.DetailedIngredient;
 import maar.project.meal.json.RecipeResponse;
 import maar.project.menu.json.MenuRequest;
-import maar.project.menu.json.MenuResponse;
 import org.leadpony.justify.api.JsonSchema;
 import org.leadpony.justify.api.JsonValidationService;
 import org.leadpony.justify.api.ProblemHandler;
@@ -51,7 +50,7 @@ public class RestAppJson extends ApiConfig {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
             summary = "Génère un menu complet aléatoire",
-            description = "Retourne un menu JSON contenant une entrée, un plat, un dessert et une boisson, tous générés aléatoirement mais en respectant les filtres passés dans la requête. Les données proviennent de l’API Edamam (pour les plats) et TheCocktailDB (pour les boissons).",
+            description = " Retourne un menu JSON contenant une entrée, un plat, un dessert et une boisson, tous générés aléatoirement mais en respectant les filtres passés dans la requête. Les données proviennent de l’API Edamam (pour les plats) et TheCocktailDB (pour les boissons). ",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Menu généré avec succès"),
                     @ApiResponse(responseCode = "400", description = "Paramètres invalides ou aucun résultat trouvé"),
@@ -78,115 +77,18 @@ public class RestAppJson extends ApiConfig {
             jakarta.json.bind.Jsonb jsonb = jakarta.json.bind.JsonbBuilder.create();
             MenuRequest request = jsonb.fromJson(rawJson, MenuRequest.class);
 
-            RecipeResponse entree = fetchValidRecipe(request, this);
-            RecipeResponse plat = fetchValidRecipe(request, this);
-            RecipeResponse dessert = fetchValidRecipe(request, this);
-            DrinkResponse boisson = fetchValidDrink(request, this);
-
-            int totalPreparationTime = parseDuration(entree.getPreparationTime()) +
-                    parseDuration(plat.getPreparationTime()) +
-                    parseDuration(dessert.getPreparationTime());
-
-            if (request.getMaxPreparationTime() != null && totalPreparationTime > request.getMaxPreparationTime()) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Temps de préparation total trop élevé pour le max fourni.").build();
-            }
-
-            MenuResponse menu = new MenuResponse();
-            menu.setEntree(entree);
-            menu.setPlat(plat);
-            menu.setDessert(dessert);
-            menu.setBoisson(boisson);
-            menu.setPreparationTime(totalPreparationTime);
-            menu.setTotalCalories(calculateTotalCalories(entree, plat, dessert));
-            return Response.ok(menu).build();
+            // faire les appels d'api ici
+            return Response.ok("MenuRequest reçu et validé ✅").build();
 
         } catch (JsonException e) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Requête d'entrée JSON invalide : " + e.getMessage()).build();
+                    .entity("Requête d'entré JSON invalide : " + e.getMessage()).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Erreur serveur : " + e.getMessage()).build();
         }
     }
 
-    private RecipeResponse callEdamamApi(String cuisineType) {
-        if (cuisineType == null || cuisineType.trim().isEmpty()) {
-            return new RecipeResponse(false, "Edamam", "400");
-        }
-
-        String fullUrl = API_URL + "?type=public&app_id=" + APP_ID + "&app_key=" + APP_KEY + "&cuisineType=" + cuisineType;
-
-        try (Client tempClient = ClientBuilder.newClient()) {
-            try (Response apiResponse = tempClient.target(fullUrl)
-                    .request(MediaType.APPLICATION_JSON)
-                    .get()) {
-
-                int status = apiResponse.getStatus();
-                if (status != 200) {
-                    return new RecipeResponse(false, "Edamam", String.valueOf(status));
-                }
-
-                String jsonResponse = apiResponse.readEntity(String.class);
-                JsonReader reader = Json.createReader(new StringReader(jsonResponse));
-                JsonObject rootJson = reader.readObject();
-
-                JsonArray hits = rootJson.getJsonArray("hits");
-                if (hits == null || hits.isEmpty()) {
-                    return new RecipeResponse(false, "Edamam", "404");
-                }
-
-                JsonObject recipeJson = hits.getJsonObject(RANDOM.nextInt(hits.size())).getJsonObject("recipe");
-
-                String name = recipeJson.getString("label", "");
-                String type = getFirstString(recipeJson, "mealType");
-                String country = getFirstString(recipeJson, "cuisineType");
-                String prepTime = "PT30M";
-                if (recipeJson.containsKey("totalTime") && recipeJson.get("totalTime").getValueType() == JsonValue.ValueType.NUMBER) {
-                    prepTime = Duration.ofMinutes(recipeJson.getJsonNumber("totalTime").intValue()).toString();
-                }
-                String image = recipeJson.getString("image", "");
-                String source = recipeJson.getString("url", "");
-
-                JsonArray ingArray = recipeJson.getJsonArray("ingredients");
-                List<DetailedIngredient> detailedIngredients = new ArrayList<>();
-                List<String> ingredientNoms = new ArrayList<>();
-                if (ingArray != null) {
-                    for (JsonValue v : ingArray) {
-                        JsonObject ing = v.asJsonObject();
-                        String nom = ing.getString("food", "");
-                        String qt = ing.containsKey("quantity") && ing.get("quantity").getValueType() == JsonValue.ValueType.NUMBER
-                                ? ing.getJsonNumber("quantity").toString() : "";
-                        String img = ing.getString("image", "");
-                        detailedIngredients.add(new DetailedIngredient(nom, qt, img));
-                        ingredientNoms.add(nom);
-                    }
-                }
-                String ingredients = String.join(", ", ingredientNoms);
-
-                // Instructions provisoires
-                List<String> instructions = new ArrayList<>();
-                instructions.add("Préparer les ingrédients.");
-                instructions.add("Cuire selon les instructions.");
-                instructions.add("Servir chaud.");
-
-                // Récupérer les calories du recipe
-                double calories = 0;
-                if (recipeJson.containsKey("calories") && recipeJson.get("calories").getValueType() == JsonValue.ValueType.NUMBER) {
-                    calories = recipeJson.getJsonNumber("calories").doubleValue();
-                }
-
-
-                RecipeResponse response = new RecipeResponse(
-                        true, name, type, country, prepTime, image, source, ingredients, detailedIngredients, instructions
-                );
-                response.setCalories(calories);
-                return response;
-            }
-        } catch (Exception e) {
-            return new RecipeResponse(false, "Edamam", "500");
-        }
-    }
 
     @GET
     @Path("/meal/{cuisineType: .*}")
@@ -206,8 +108,91 @@ public class RestAppJson extends ApiConfig {
             }
     )
     public Response getRecipe(@PathParam("cuisineType") String cuisineType) {
-        RecipeResponse recipe = callEdamamApi(cuisineType);
-        return Response.ok(recipe).build();
+        if (cuisineType == null || cuisineType.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new RecipeResponse(false, "Edamam", "400"))
+                    .build();
+        }
+
+        String fullUrl = API_URL + "?type=public&app_id=" + APP_ID + "&app_key=" + APP_KEY + "&cuisineType=" + cuisineType;
+
+        try {
+            Response apiResponse = client.target(fullUrl)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get();
+
+            int status = apiResponse.getStatus();
+            if (status != 200) {
+                return Response.status(Response.Status.BAD_GATEWAY)
+                        .entity(new RecipeResponse(false, "Edamam", String.valueOf(status)))
+                        .build();
+            }
+
+            String jsonResponse = apiResponse.readEntity(String.class);
+            JsonReader reader = Json.createReader(new StringReader(jsonResponse));
+            JsonObject rootJson = reader.readObject();
+
+            JsonArray hits = rootJson.getJsonArray("hits");
+            if (hits == null || hits.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new RecipeResponse(false, "Edamam", "404"))
+                        .build();
+            }
+
+            JsonObject recipeJson = hits.getJsonObject(RANDOM.nextInt(hits.size())).getJsonObject("recipe");
+
+            String name = recipeJson.getString("label", "");
+            String type = getFirstString(recipeJson, "mealType");
+            String country = getFirstString(recipeJson, "cuisineType");
+            String prepTime = "PT30M";
+            if (recipeJson.containsKey("totalTime") && recipeJson.get("totalTime").getValueType() == JsonValue.ValueType.NUMBER) {
+                prepTime = Duration.ofMinutes(recipeJson.getJsonNumber("totalTime").intValue()).toString();
+            }
+            String image = recipeJson.getString("image", "");
+            String source = recipeJson.getString("url", "");
+
+            JsonArray ingArray = recipeJson.getJsonArray("ingredients");
+            List<DetailedIngredient> detailedIngredients = new ArrayList<>();
+            List<String> ingredientNoms = new ArrayList<>();
+            if (ingArray != null) {
+                for (JsonValue v : ingArray) {
+                    JsonObject ing = v.asJsonObject();
+                    String nom = ing.getString("food", "");
+                    String qt = ing.containsKey("quantity") && ing.get("quantity").getValueType() == JsonValue.ValueType.NUMBER
+                            ? ing.getJsonNumber("quantity").toString() : "";
+                    String img = ing.getString("image", "");
+                    detailedIngredients.add(new DetailedIngredient(nom, qt, img));
+                    ingredientNoms.add(nom);
+                }
+            }
+            String ingredients = String.join(", ", ingredientNoms);
+
+            // JE NE TROUVE PAS LA DONNE DANS L API DONC J AI MIS DES DONNEES MOQUE EN ATTENDANT
+            List<String> instructions = new ArrayList<>();
+            instructions.add("Préparer les ingrédients.");
+            instructions.add("Cuire selon les instructions.");
+            instructions.add("Servir chaud.");
+
+            RecipeResponse recipe = new RecipeResponse(
+                    true, name, type, country, prepTime, image, source, ingredients, detailedIngredients, instructions
+            );
+
+            return Response.ok(recipe).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new RecipeResponse(false, "Edamam", "500"))
+                    .build();
+        }
+    }
+
+    private String getFirstString(JsonObject obj, String key) {
+        if (obj.containsKey(key) && obj.get(key).getValueType() == JsonValue.ValueType.ARRAY) {
+            JsonArray arr = obj.getJsonArray(key);
+            if (!arr.isEmpty()) {
+                return arr.getString(0);
+            }
+        }
+        return "";
     }
 
     @GET
@@ -227,85 +212,62 @@ public class RestAppJson extends ApiConfig {
             }
     )
     public Response getDrinkJson(@QueryParam("alcoholic") String alcoholic) {
-        DrinkResponse drink = callDrinkApi(alcoholic == null ? null : alcoholic.equals("true"), null);
-        return Response.ok(drink).build();
-    }
-
-    private String getFirstString(JsonObject obj, String key) {
-        if (obj.containsKey(key) && obj.get(key).getValueType() == JsonValue.ValueType.ARRAY) {
-            JsonArray arr = obj.getJsonArray(key);
-            if (!arr.isEmpty()) {
-                return arr.getString(0);
-            }
-        }
-        return "";
-    }
-
-    private DrinkResponse callDrinkApi(Boolean alcohol, String requiredIngredient) {
         String filterPath;
-        if (alcohol == null) {
+
+        if (alcoholic == null) {
             filterPath = "random.php";
-        } else if (alcohol) {
-            filterPath = "filter.php?a=Alcoholic";
         } else {
-            filterPath = "filter.php?a=Non_Alcoholic";
-        }
-
-        try (Client tempClient = ClientBuilder.newClient()) {
-            try (Response apiResponse = tempClient.target(API_URL_DRINK + filterPath)
-                    .request(MediaType.APPLICATION_JSON)
-                    .get()) {
-
-                TheCocktailDBResponse raw = apiResponse.readEntity(TheCocktailDBResponse.class);
-
-                if (raw.getDrinks() == null || raw.getDrinks().isEmpty()) {
-                    DrinkResponse error = new DrinkResponse();
-                    error.setSuccess(false);
-                    error.setApi_failed("TheCocktailDB");
-                    error.setApi_status("404");
-                    return error;
-                }
-
-                TheCocktailDBResponse.Drink drink;
-
-                if (alcohol == null) {
-                    drink = raw.getDrinks().get(0);
-                } else {
-                    int randIndex = RANDOM.nextInt(raw.getDrinks().size());
-                    String idDrink = raw.getDrinks().get(randIndex).getIdDrink();
-
-                    try (Response detailsResponse = tempClient.target(API_URL_DRINK + "lookup.php?i=" + idDrink)
-                            .request(MediaType.APPLICATION_JSON)
-                            .get()) {
-
-                        TheCocktailDBResponse details = detailsResponse.readEntity(TheCocktailDBResponse.class);
-                        drink = details.getDrinks().get(0);
-                    }
-                }
-
-                DrinkResponse formatted = convertToDrinkResponse(drink);
-
-                if (requiredIngredient != null) {
-                    boolean found = formatted.getIngredients().stream()
-                            .anyMatch(ingredient -> ingredient.equalsIgnoreCase(requiredIngredient));
-                    if (!found) {
-                        DrinkResponse error = new DrinkResponse();
-                        error.setSuccess(false);
-                        error.setApi_failed("TheCocktailDB");
-                        error.setApi_status("404");
-                        return error;
-                    }
-                }
-
-                return formatted;
+            switch (alcoholic) {
+                case "true":
+                    filterPath = "filter.php?a=Alcoholic";
+                    break;
+                case "false":
+                    filterPath = "filter.php?a=Non_Alcoholic";
+                    break;
+                default:
+                    return buildErrorResponse("400");
             }
-        } catch (Exception e) {
-            DrinkResponse error = new DrinkResponse();
-            error.setSuccess(false);
-            error.setApi_failed("TheCocktailDB");
-            error.setApi_status("500");
-            return error;
         }
+
+        try {
+            Response rawResponse = client.target(API_URL_DRINK + filterPath)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get();
+
+            TheCocktailDBResponse raw = rawResponse.readEntity(TheCocktailDBResponse.class);
+            if (raw.getDrinks() == null || raw.getDrinks().isEmpty()) {
+                return buildErrorResponse("404");
+            }
+
+            TheCocktailDBResponse.Drink drink;
+            if (alcoholic == null) {
+                drink = raw.getDrinks().get(0);
+            } else {
+                int randIndex = RANDOM.nextInt(raw.getDrinks().size());
+                String idDrink = raw.getDrinks().get(randIndex).getIdDrink();
+
+                Response detailsResponse = client.target(API_URL_DRINK + "lookup.php?i=" + idDrink)
+                        .request(MediaType.APPLICATION_JSON)
+                        .get();
+
+                TheCocktailDBResponse details = detailsResponse.readEntity(TheCocktailDBResponse.class);
+                drink = details.getDrinks().get(0);
+            }
+
+            DrinkResponse formatted = convertToDrinkResponse(drink);
+            return Response.ok(formatted).build();
+
+        } catch (Exception e) {
+            return buildErrorResponse("500");
+        }
+    }
+
+    private Response buildErrorResponse(String code) {
+        DrinkResponse error = new DrinkResponse();
+        error.setSuccess(false);
+        error.setApi_failed("TheCocktailDB");
+        error.setApi_status(code);
+        return Response.status(Integer.parseInt(code)).entity(error).build();
     }
 
     public DrinkResponse convertToDrinkResponse(TheCocktailDBResponse.Drink rawDrink) {
@@ -343,68 +305,6 @@ public class RestAppJson extends ApiConfig {
         result.setDetailedIngredients(detailed);
 
         return result;
-    }
-
-    public static RecipeResponse fetchValidRecipe(MenuRequest request, RestAppJson api) {
-        while (true) {
-            RecipeResponse recipe = api.callEdamamApi(request.getCuisineType());
-
-            if (!recipe.isSuccess()) continue;
-
-            if (request.getConstraints() != null && !request.getConstraints().isEmpty()) {
-                boolean respectsConstraints = request.getConstraints().stream()
-                        .allMatch(constraint -> recipeMatchesConstraint(recipe, constraint));
-
-                if (!respectsConstraints) continue;
-            }
-
-            return recipe;
-        }
-    }
-
-    public static DrinkResponse fetchValidDrink(MenuRequest request, RestAppJson api) {
-        while (true) {
-            Boolean alcoholic = request.getAlcohol();
-            DrinkResponse drink = api.callDrinkApi(alcoholic, request.getRequiredIngredient());
-
-            if (!drink.isSuccess()) continue;
-
-            if (request.getRequiredIngredient() != null) {
-                boolean found = drink.getIngredients().stream()
-                        .anyMatch(ingredient -> ingredient.equalsIgnoreCase(request.getRequiredIngredient()));
-
-                if (!found) continue;
-            }
-
-            return drink;
-        }
-    }
-
-    public static int parseDuration(String duration) {
-        if (duration == null || duration.isEmpty()) return 0;
-        return (int) Duration.parse(duration).toMinutes();
-    }
-
-    public static boolean recipeMatchesConstraint(RecipeResponse recipe, String constraint) {
-        String ingredients = recipe.getIngredients().toLowerCase();
-
-        switch (constraint) {
-            case "vegetarian":
-            case "vegan":
-                return !ingredients.contains("meat") && !ingredients.contains("chicken") && !ingredients.contains("fish");
-            case "gluten-free":
-                return !ingredients.contains("wheat") && !ingredients.contains("bread");
-            case "pork-free":
-                return !ingredients.contains("pork") && !ingredients.contains("bacon");
-            case "dairy-free":
-                return !ingredients.contains("cheese") && !ingredients.contains("milk");
-            default:
-                return true;
-        }
-    }
-
-    public static int calculateTotalCalories(RecipeResponse entree, RecipeResponse plat, RecipeResponse dessert) {
-        return (int)(entree.getCalories() + plat.getCalories() + dessert.getCalories());
     }
 
 }

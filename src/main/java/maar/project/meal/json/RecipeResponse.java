@@ -56,8 +56,6 @@ public class RecipeResponse {
     @JsonbProperty("api_status")
     private String apiStatus;
 
-    private transient double calories;
-
     public RecipeResponse() {}
 
     public RecipeResponse(boolean success, String apiFailed, String apiStatus) {
@@ -93,6 +91,4 @@ public class RecipeResponse {
     public String getIngredients() { return ingredients; }
     public List<DetailedIngredient> getDetailedIngredients() { return detailedIngredients; }
     public List<String> getInstructions() { return instructions; }
-    public double getCalories() {return calories;}
-    public void setCalories(double calories) {this.calories = calories;}
 }
