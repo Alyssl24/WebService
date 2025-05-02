@@ -19,12 +19,43 @@
 
 - Paramètre : cuisineType une chaîne de caractères indiquant le type de cuisine (ex. "italian", "mexican", etc.)
 
+### Recette de plat (v2 - JSON)
+
+- **URL** : `/v2/recipe/meal/{cuisineType}`
+- **Méthode** : `GET`
+- **Paramètre** : `cuisineType` (ex: `italian`, `mexican`, `japanese`, etc.)
+- **Retour** : une recette de plat au format JSON, conforme au schéma `RecipeMeal.json`
+
 ### Boisson:
   
   - URL pour la boisson : /recipe/drink
   - ou alors : /recipe/drink?alcoholic=true
  
   - Paramètre : alcoholic qui prend en paramètre un boolean indiquant si on veut une boisson alcoolisé ou non. Si le paramètre n'est pas mie, alors une boisson au hasard sera proposé.
+    
+### Recette de boisson (v2 - JSON)
+
+- **URL** : `/v2/recipe/drink`
+- **Méthode** : `GET`
+- **Paramètre optionnel** : `alcoholic=true|false`
+  - `alcoholic=true` → boisson alcoolisée
+  - `alcoholic=false` → boisson sans alcool
+  - sans paramètre → boisson aléatoire
+
+### Menu complet personnalisé (v2 - JSON)
+
+- **URL** : `/v2/recipe/menu`
+- **Méthode** : `POST`
+- **Corps JSON** (exemple valide) :
+```json
+{
+  "cuisineType": "japanese",
+  "alcohol": true,
+  "requiredIngredient": "ginger",
+  "maxPreparationTime": 30,
+  "constraints": ["vegan", "gluten-free"]
+}
+```
 
 Pour faire des tests il vous suffit lancer le serveur avec le Main.java et lancer ensuite une requête de la sorte : 
 http://localhost:8000/recipe/meal/<cuisineType>
