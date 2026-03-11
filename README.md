@@ -1,8 +1,8 @@
-# Projet MAAR : Un web service RESTful 
+# MAAR Project: A RESTful Web Service
 
-## Membres de l'équipe-projet
+## Project Team Members
 
-| Prénom  | NOM       | Username   |
+| First Name   | Last Name        | Username   |
 |---------|-----------|------------|
 | Alyssia | Leclerc   | Alyssl24   |
 | Chedli  | Benjaafar | Chaydonart |
@@ -11,42 +11,41 @@
 
 ## Instructions
 
-### Repas:
+### Meals
 
-- URL pour le repas : /recipe/meal/{cuisineType}
+- Meal URL: `/recipe/meal/{cuisineType}`
+- HTTP Method: `GET`
+- Parameter: `cuisineType` — a string indicating the type of cuisine (e.g., `"italian"`, `"mexican"`, etc.)
 
-- Méthode HTTP : GET
+### Meal Recipe (v2 - JSON)
 
-- Paramètre : cuisineType une chaîne de caractères indiquant le type de cuisine (ex. "italian", "mexican", etc.)
+- **URL**: `/v2/recipe/meal/{cuisineType}`
+- **Method**: `GET`
+- **Parameter**: `cuisineType` (e.g., `italian`, `mexican`, `japanese`, etc.)
+- **Response**: a meal recipe in JSON format, following the `RecipeMeal.json` schema
 
-### Recette de plat (v2 - JSON)
+### Drinks
 
-- **URL** : `/v2/recipe/meal/{cuisineType}`
-- **Méthode** : `GET`
-- **Paramètre** : `cuisineType` (ex: `italian`, `mexican`, `japanese`, etc.)
-- **Retour** : une recette de plat au format JSON, conforme au schéma `RecipeMeal.json`
+- Drink URL: `/recipe/drink`
+- Or: `/recipe/drink?alcoholic=true`
 
-### Boisson:
-  
-  - URL pour la boisson : /recipe/drink
-  - ou alors : /recipe/drink?alcoholic=true
- 
-  - Paramètre : alcoholic qui prend en paramètre un boolean indiquant si on veut une boisson alcoolisé ou non. Si le paramètre n'est pas mie, alors une boisson au hasard sera proposé.
+- Parameter: `alcoholic` — a boolean indicating whether the drink should contain alcohol or not.  
+  If the parameter is not provided, a random drink will be returned.
     
-### Recette de boisson (v2 - JSON)
+### Drink Recipe (v2 - JSON)
 
-- **URL** : `/v2/recipe/drink`
-- **Méthode** : `GET`
-- **Paramètre optionnel** : `alcoholic=true|false`
-  - `alcoholic=true` → boisson alcoolisée
-  - `alcoholic=false` → boisson sans alcool
-  - sans paramètre → boisson aléatoire
+- **URL**: `/v2/recipe/drink`
+- **Method**: `GET`
+- **Optional Parameter**: `alcoholic=true|false`
+  - `alcoholic=true` → alcoholic drink
+  - `alcoholic=false` → non-alcoholic drink
+  - no parameter → random drink
 
-### Menu complet personnalisé (v2 - JSON)
+### Personalized Full Menu (v2 - JSON)
 
 - **URL** : `/v2/recipe/menu`
-- **Méthode** : `POST`
-- **Corps JSON** (exemple valide) :
+- **Method** : `POST`
+- **JSON Body** (valid example) :
 ```json
 {
   "cuisineType": "japanese",
@@ -57,20 +56,20 @@
 }
 ```
 
-Pour faire des tests il vous suffit lancer le serveur avec le Main.java et lancer ensuite une requête de la sorte : 
+To run tests, simply start the server using `Main.java` and then send a request such as:  
 http://localhost:8000/recipe/meal/<cuisineType>
 
 
 ---
 
-## Génération du fichier OpenAPI
+## OpenAPI File Generation
 
-Pour générer le fichier OpenAPI (`openapi.json`), exécutez simplement la commande suivante dans le terminal :
+To generate the OpenAPI file (`openapi.json`), simply run the following command in the terminal:
 ```bash
 mvn clean compile
 ```
 
-Le fichier sera automatiquement généré dans le dossier suivant :
+The file will automatically be generated in the following directory:
 ```bash
 target/generatedtest/openapi.json
 ```
